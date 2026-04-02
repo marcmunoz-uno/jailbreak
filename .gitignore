@@ -22,3 +22,4 @@ settings.local.json
 
 # OS files
 .DS_Store
+projects/**/tool-results/

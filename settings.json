@@ -24,6 +24,11 @@
             "type": "command",
             "command": "/Users/marcmunoz/icarus-daedalus/hooks/on-stop.sh",
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "/Users/marcmunoz/.jailbreak/hooks/on-error.sh",
+            "async": true
           }
         ]
       }
