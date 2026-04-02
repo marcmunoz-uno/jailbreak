@@ -17,8 +17,8 @@ Part of a multi-agent autonomous system:
 
 ```
 jailbreak/
-├── agents/           21 specialist agents (architect, debugger, evolve, etc.)
-├── skills/           36 executable workflows (autopilot, ralph, self-evolve, etc.)
+├── agents/           30 specialist agents (swarm-commander, deployer, firefighter, etc.)
+├── skills/           42 executable workflows (swarm, deploy, scaffold, incident, etc.)
 ├── hooks/            5 lifecycle scripts (session start/stop, error capture, etc.)
 ├── commands/         Slash commands (conway, deploy, status)
 ├── hud/              Statusline HUD script
@@ -31,30 +31,43 @@ jailbreak/
 └── settings.json     Jailbreak harness config
 ```
 
-## Agents
+## Agents (30)
 
-21 specialized agents organized by function:
+Organized by function:
 
+**Orchestration**: swarm-commander, planner
 **Analysis**: architect, analyst, critic, tracer, scientist, integrator
-**Implementation**: executor, designer, code-simplifier, debugger, git-master
+**Implementation**: executor, designer, code-simplifier, debugger, git-master, scaffolder, api-builder, db-engineer
+**Operations**: deployer, firefighter, monitor, pipeline-builder, connector
 **Quality**: code-reviewer, security-reviewer, test-engineer, qa-tester, verifier
 **Support**: explore, document-specialist, writer
-**Meta**: evolve (self-improvement), planner
+**Meta**: evolve (self-improvement)
 
 Each agent has a defined model tier (haiku/sonnet/opus), tool permissions, and handoff rules.
 
-## Skills
+## Skills (42)
 
-36 workflows including:
-
+### Execution
+- **swarm** — Decompose any task into parallel agent waves, execute with max concurrency
 - **autopilot** — Full autonomous: expand idea > plan > execute > QA > validate
 - **ralph** — Persistence loop until acceptance criteria pass
+- **team** — N coordinated agents on shared task list
+- **nuke** — Controlled teardown and parallel rebuild of broken services
+
+### Build & Ship
+- **scaffold** — Generate complete runnable projects from a description
+- **deploy** — One-command deployment to any target (Conway, Docker, VPS, serverless)
+- **wire** — Connect any two services (webhooks, MCP, adapters, pipelines)
+
+### Analysis & Fix
 - **multi-model-chain** — Progressive haiku > sonnet > opus pipeline with quality gates
-- **self-evolve** — Evidence-backed harness improvement loop
 - **auto-fix** — Error diagnosis with 3-attempt circuit breaker
 - **perf-profile** — Measure > diagnose > optimize > verify with benchmarks
-- **team** — N coordinated agents on shared task list
+- **incident** — Production incident response: triage > fix > verify > document
 - **deep-interview** — Socratic Q&A with ambiguity scoring
+
+### Meta
+- **self-evolve** — Evidence-backed harness improvement loop
 
 ## Hooks
 
