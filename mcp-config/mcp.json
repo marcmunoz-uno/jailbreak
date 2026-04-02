@@ -1,0 +1,30 @@
+{
+  "agent-memory": {
+    "command": "/Users/marcmunoz/agent-memory-server/venv/bin/python",
+    "args": ["/Users/marcmunoz/agent-memory-server/mcp_server.py"],
+    "env": {
+      "PYTHONUNBUFFERED": "1"
+    }
+  },
+  "task-dispatcher": {
+    "command": "/usr/bin/python3",
+    "args": ["/Users/marcmunoz/n8n-workflows/task_mcp_server.py"],
+    "env": {
+      "PYTHONUNBUFFERED": "1"
+    }
+  },
+  "godmode": {
+    "command": "/usr/bin/python3",
+    "args": ["/Users/marcmunoz/n8n-workflows/godmode_mcp_server.py"],
+    "env": {
+      "PYTHONUNBUFFERED": "1"
+    }
+  },
+  "parse": {
+    "type": "http",
+    "url": "https://api.parse.bot/mcp",
+    "headers": {
+      "X-API-Key": "REDACTED — set your own Parse.bot API key"
+    }
+  }
+}

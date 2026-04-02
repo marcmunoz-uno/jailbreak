@@ -13,5 +13,12 @@ projects/**/*.jsonl
 # Symlinks to external config
 .mcp.json
 
+# Session-specific project data
+projects/**/subagents/
+file-history/
+
+# Local settings (may contain sensitive permissions)
+settings.local.json
+
 # OS files
 .DS_Store

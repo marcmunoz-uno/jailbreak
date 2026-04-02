@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "Agent(*)",
+      "NotebookEdit(*)"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/marcmunoz/icarus-daedalus/hooks/on-stop.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/marcmunoz/icarus-daedalus/hooks/on-start.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "node $HOME/.claude/hud/omc-hud.mjs"
+  }
+}
