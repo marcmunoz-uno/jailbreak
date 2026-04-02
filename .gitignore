@@ -1,0 +1,17 @@
+# Sensitive/session data
+sessions/
+history.jsonl
+shell-snapshots/
+backups/
+mcp-needs-auth-cache.json
+session-env/
+cache/
+
+# Conversation logs
+projects/**/*.jsonl
+
+# Symlinks to external config
+.mcp.json
+
+# OS files
+.DS_Store

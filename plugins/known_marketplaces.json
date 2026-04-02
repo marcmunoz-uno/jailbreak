@@ -1,0 +1,10 @@
+{
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "/Users/marcmunoz/.jailbreak/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-04-01T23:37:52.301Z"
+  }
+}
