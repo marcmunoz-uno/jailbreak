@@ -35,7 +35,7 @@ jailbreak/
 
 Organized by function:
 
-**Orchestration**: swarm-commander, planner
+**Orchestration**: ender (recursive swarm commander), planner
 **Analysis**: architect, analyst, critic, tracer, scientist, integrator
 **Implementation**: executor, designer, code-simplifier, debugger, git-master, scaffolder, api-builder, db-engineer
 **Operations**: deployer, firefighter, monitor, pipeline-builder, connector

@@ -21,7 +21,7 @@ Tracks all harness changes proposed and applied by the `self-evolve` skill.
 
 | # | Proposal | Status | Target | Impact |
 |---|----------|--------|--------|--------|
-| 1 | Add swarm-commander agent (dynamic parallel orchestration) | applied | agents/swarm-commander.md | B:5 D:2 |
+| 1 | Add ender agent (dynamic parallel orchestration) | applied | agents/ender.md | B:5 D:2 |
 | 2 | Add deployer agent (universal deployment) | applied | agents/deployer.md | B:5 D:1 |
 | 3 | Add api-builder agent (full API service generation) | applied | agents/api-builder.md | B:4 D:1 |
 | 4 | Add db-engineer agent (schema, migrations, optimization) | applied | agents/db-engineer.md | B:4 D:1 |

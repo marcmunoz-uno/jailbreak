@@ -3,13 +3,14 @@ name: swarm
 description: Dynamic swarm orchestration — decompose any task into parallel agent waves, execute, merge results
 level: 5
 triggers:
-  - swarm
-  - army
   - parallel build
   - fan out
 user-invocable: true
+aliases:
+  - swarm-legacy
+note: Prefer /ender for full recursive swarm capability. This skill is a simpler flat-parallel mode.
 pipeline:
-  - swarm-commander (plan) → agents × N (execute) → integrator (merge) → verifier (confirm)
+  - ender (plan) → agents × N (execute) → integrator (merge) → verifier (confirm)
 ---
 
 # Swarm Skill
@@ -24,7 +25,7 @@ Take any task — from "build a full-stack app" to "fix 15 bugs" to "review ever
 - Any task where sequential execution is the bottleneck
 
 ## Execution Policy
-- **Orchestrator**: swarm-commander (Opus) plans waves, assigns agents
+- **Orchestrator**: ender (Opus) plans waves, assigns agents
 - **Workers**: Appropriate agents per task, run in worktree isolation when writing code
 - **Max concurrency**: 20 agents per wave
 - **Conflict prevention**: Worktree isolation for writers, none needed for readers
@@ -32,8 +33,8 @@ Take any task — from "build a full-stack app" to "fix 15 bugs" to "review ever
 
 ## Workflow
 
-### Phase 1: Decompose (swarm-commander)
-Spawn swarm-commander with full task description:
+### Phase 1: Decompose (ender)
+Spawn ender with full task description:
 1. Commander analyzes the task and produces a wave plan
 2. Each wave has: agent assignments, isolation mode, dependencies, timeouts
 3. Conflict map identifies shared files and resolution strategy

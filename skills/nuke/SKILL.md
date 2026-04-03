@@ -9,7 +9,7 @@ triggers:
   - scorched earth
 user-invocable: true
 pipeline:
-  - architect (plan) → swarm (parallel rebuild) → deployer (ship) → monitor (verify)
+  - architect (plan) → ender (parallel rebuild) → deployer (ship) → monitor (verify)
 ---
 
 # Nuke Skill
