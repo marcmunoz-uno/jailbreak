@@ -1,0 +1,64 @@
+{
+  "last_compiled": "2026-04-04T05:39:52.518377+00:00",
+  "compiler_version": "1.0.0",
+  "compilation_results": {
+    "cron_health": true,
+    "config_drift": true,
+    "risk_scores": true,
+    "data_freshness": true
+  },
+  "ontology_files": {
+    "agent_interactions.json": {
+      "size_bytes": 11611,
+      "last_modified": "2026-04-04T05:33:47.057803+00:00"
+    },
+    "config_drift.json": {
+      "size_bytes": 7156,
+      "last_modified": "2026-04-04T05:39:52.521310+00:00"
+    },
+    "correlations.json": {
+      "size_bytes": 7993,
+      "last_modified": "2026-04-04T05:34:22.497443+00:00"
+    },
+    "cron_health_timeline.json": {
+      "size_bytes": 15472,
+      "last_modified": "2026-04-04T05:39:52.519345+00:00"
+    },
+    "data_freshness.json": {
+      "size_bytes": 6799,
+      "last_modified": "2026-04-04T05:39:52.529300+00:00"
+    },
+    "dependency_graph.json": {
+      "size_bytes": 30000,
+      "last_modified": "2026-04-04T05:33:50.435731+00:00"
+    },
+    "enhancement_opportunities.json": {
+      "size_bytes": 13467,
+      "last_modified": "2026-04-04T05:35:41.039069+00:00"
+    },
+    "error_taxonomy.json": {
+      "size_bytes": 8750,
+      "last_modified": "2026-04-04T05:35:55.341671+00:00"
+    },
+    "failure_cascades.json": {
+      "size_bytes": 5926,
+      "last_modified": "2026-04-04T05:34:42.848424+00:00"
+    },
+    "pipeline_bottlenecks.json": {
+      "size_bytes": 10405,
+      "last_modified": "2026-04-04T05:35:51.601093+00:00"
+    },
+    "recovery_patterns.json": {
+      "size_bytes": 9960,
+      "last_modified": "2026-04-04T05:34:44.602763+00:00"
+    },
+    "resource_contention.json": {
+      "size_bytes": 8507,
+      "last_modified": "2026-04-04T05:34:42.860039+00:00"
+    },
+    "risk_scores.json": {
+      "size_bytes": 10664,
+      "last_modified": "2026-04-04T05:39:52.528737+00:00"
+    }
+  }
+}

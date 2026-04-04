@@ -1,0 +1,232 @@
+{
+  "generated_at": "2026-04-01T00:00:00Z",
+  "analysis": "Agent Interaction Model — Fleet Beta Squad 7",
+  "agents": [
+    {
+      "id": "nexus",
+      "role": "autonomous_coordinator",
+      "frequency": "every 5 min via cron",
+      "model": "google/gemini-2.5-flash",
+      "talks_to": [
+        "system_brain (read agent_states, corrections, learnings, health; write state, health, corrections, learnings)",
+        "event_bus (peek_events for context, publish_event for nexus_alert/nexus_event)",
+        "data_bus (get_channel_status for freshness monitoring)",
+        "task_dispatcher (submit_task, list_tasks, get_dashboard)",
+        "outcome_tracker (get_signal_scoreboard, get_trade_outcomes, get_funnel_stats)",
+        "fabric_handoff (create_handoff to claude_code/coordinator, list_handoffs)",
+        "godmode_client (LLM reasoning calls)",
+        "auto_debugger (run_debug_pipeline for failing components)",
+        "improvement_tracker (propose + auto-approve improvements)",
+        "feedback_loop (run_feedback_cycle for trading weights, DSCR priorities)",
+        "pheromones (emit, check_and_trigger, decay_all)",
+        "circadian (get_current_phase, run_phase_check)",
+        "ontology (find_bottlenecks, sync_from_system)",
+        "ontology_reasoner (run_reasoning_cycle)",
+        "self_healer (monitor_and_heal — pre-LLM fast healing)",
+        "hermes_bridge (request_research)",
+        "outcome_verifier (verify_pending)",
+        "knowledge_bridge (sync_hermes_to_system)",
+        "telegram (send notifications to Marc — rate-limited, max 5/cycle)"
+      ],
+      "max_actions_per_cycle": 15,
+      "max_tasks_per_day": 50,
+      "kill_switch": "NEXUS_DISABLED env var or system_brain health nexus=down"
+    },
+    {
+      "id": "coordinator",
+      "role": "rule_based_coordinator (predecessor to nexus)",
+      "frequency": "every 5 min via cron",
+      "talks_to": [
+        "event_bus (consume_events, publish_event, publish_trigger, peek_events)",
+        "metrics (read_metrics, aggregate, record)",
+        "data_bus (get_channel_status, read_latest)",
+        "task_dispatcher (submit_task, list_tasks, get_dashboard)",
+        "outcome_tracker (get_signal_scoreboard, get_trade_outcomes, get_funnel_stats, get_active_insights)",
+        "system_brain (report_state, report_health, check_health, record_learning, get_unhealthy, record_correction, verify_correction, lookup_correction)",
+        "fabric_handoff (create_handoff, list_handoffs, complete_handoff, get_briefing)",
+        "fabric_janitor (run_cleanup)",
+        "telegram (alerts to Marc)"
+      ]
+    },
+    {
+      "id": "openclaw",
+      "role": "cron_execution_engine",
+      "frequency": "per-job schedules (2h, daily, weekly)",
+      "talks_to": [
+        "task_dispatcher (via task_mcp_server MCP tools: get_next, submit, complete, fail, delegate)",
+        "fabric (writes openclaw-task-*.md entries on cron completion)",
+        "system_brain (reads briefing before tasks)",
+        "data_bus (publishes dscr_leads, dscr_traced, dscr_emails, kalshi_scan)",
+        "telegram (sends results to Marc)"
+      ]
+    },
+    {
+      "id": "claude_code",
+      "role": "developer_agent",
+      "frequency": "on-demand via tasks and handoffs",
+      "talks_to": [
+        "task_dispatcher (via task_mcp_server MCP: task_get_next, task_complete, task_fail, task_delegate)",
+        "system_brain (get_briefing before work, report_state after work)",
+        "fabric (writes claude-code-decision-*.md entries)",
+        "shared_memory (publish insights, recall context)",
+        "event_bus (publish events on completion)"
+      ]
+    },
+    {
+      "id": "hermes",
+      "role": "research_and_telegram_interface",
+      "frequency": "on-demand via telegram or hermes_bridge",
+      "talks_to": [
+        "hermes_bridge (receives research requests from nexus/coordinator)",
+        "fabric (writes hermes-decision-*.md entries)",
+        "shared_memory (publish research findings)",
+        "knowledge_bridge (syncs knowledge to system_brain)",
+        "telegram (bidirectional: receives user commands, sends responses)"
+      ]
+    },
+    {
+      "id": "self_healer",
+      "role": "automated_recovery",
+      "frequency": "every nexus cycle (pre-LLM phase)",
+      "talks_to": [
+        "system_brain (check_health, report_health)",
+        "fabric_handoff (create_handoff when strategies exhausted)",
+        "coordinator (escalates unhealed components)"
+      ]
+    },
+    {
+      "id": "auto_debugger",
+      "role": "automated_diagnosis",
+      "frequency": "on-demand via nexus auto_debug action",
+      "talks_to": [
+        "system_brain (lookup_correction, record_correction)",
+        "task_dispatcher (may submit follow-up tasks)"
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": "system_brain",
+      "type": "sqlite_database",
+      "path": "/Users/marcmunoz/.openclaw/data/system_brain.db",
+      "tables": ["agent_state", "corrections", "health", "learnings"],
+      "producers": ["nexus", "coordinator", "claude_code", "openclaw", "self_healer", "auto_debugger", "hermes"],
+      "consumers": ["nexus", "coordinator", "claude_code", "openclaw", "self_healer", "auto_debugger"],
+      "protocol": "SQLite WAL mode, timeout=5s, row_factory=sqlite3.Row"
+    },
+    {
+      "id": "data_bus",
+      "type": "shared_memory_files",
+      "path": "/Users/marcmunoz/.openclaw/data/",
+      "channels": ["glint", "kalshi_scan", "dscr_leads", "dscr_traced", "dscr_emails"],
+      "producers": ["glint_monitor", "kalshi_scanner", "dscr_lead_scraper", "dscr_agent"],
+      "consumers": ["nexus", "coordinator", "openclaw", "trade_engine"],
+      "protocol": "JSON files with timestamped versions + latest symlink (atomic via os.rename), legacy /tmp fallback, auto-prune to 48 versions"
+    },
+    {
+      "id": "event_bus",
+      "type": "pub_sub",
+      "path": "/Users/marcmunoz/.openclaw/data/events.db",
+      "events": [
+        "signal_detected", "critical_signal", "trade_placed", "trade_resolved",
+        "lead_generated", "lead_advanced", "scan_complete", "health_alert",
+        "analysis_complete", "memory:published", "nexus_alert", "nexus_event",
+        "trigger:<agent_name> (direct agent triggers)"
+      ],
+      "producers": ["nexus", "coordinator", "glint_monitor", "kalshi_scanner", "shared_memory", "openclaw"],
+      "consumers": ["nexus", "coordinator", "kalshi_scanner", "trade_engine"],
+      "protocol": "SQLite WAL, events + consumers + subscriptions tables, TTL 2h default, priority 0-2, consume-once per consumer"
+    },
+    {
+      "id": "shared_memory",
+      "type": "write_through_layer",
+      "paths": [
+        "/Users/marcmunoz/.openclaw/data/shared_memory.jsonl (always-available log)",
+        "http://127.0.0.1:8100 (ChromaDB memory server — semantic search)",
+        "/Users/marcmunoz/Documents/Obsidian Vault (optional vault persistence)"
+      ],
+      "producers": ["nexus", "coordinator", "claude_code", "hermes", "outcome_analyzer", "system_brain (via publish_correction)"],
+      "consumers": ["all agents via recall() and recall_for_task()"],
+      "protocol": "Write to JSONL log + ChromaDB + event_bus + optional Obsidian vault; read via semantic search or keyword fallback"
+    },
+    {
+      "id": "fabric",
+      "type": "file_system_handoffs",
+      "path": "/Users/marcmunoz/fabric/",
+      "cold_archive": "/Users/marcmunoz/fabric/cold/",
+      "read_by": ["nexus", "coordinator", "claude_code", "hermes"],
+      "written_by": ["nexus", "coordinator", "openclaw", "claude_code", "hermes", "self_healer"],
+      "protocol": "Markdown files with YAML frontmatter. Types: handoff, task, decision. Tiers: hot (active), cold (archived). Naming: {agent}-{type}-{timestamp}-{hex}.md"
+    },
+    {
+      "id": "task_dispatcher",
+      "type": "task_queue",
+      "path": "/Users/marcmunoz/.openclaw/data/ (SQLite)",
+      "mcp_bridge": "task_mcp_server.py (JSON-RPC over stdio)",
+      "producers": ["nexus", "coordinator", "hermes", "claude_code (via MCP)", "openclaw"],
+      "consumers": ["claude_code (via MCP task_get_next)", "openclaw", "hermes"],
+      "protocol": "Auto-routing: code->claude_code, execute->openclaw, research->hermes. Priority 0-3. Statuses: submitted, assigned, in_progress, completed, failed. Delegation creates parent-child task links."
+    },
+    {
+      "id": "telegram",
+      "type": "external_notification",
+      "producers": ["nexus", "coordinator", "openclaw", "hermes"],
+      "consumers": ["marc (human)"],
+      "protocol": "Rate limited: nexus max 5/cycle, 1 per topic per 6h. Hermes bidirectional."
+    },
+    {
+      "id": "pheromones",
+      "type": "emergent_signal_layer",
+      "producers": ["nexus", "coordinator", "any agent via emit()"],
+      "consumers": ["nexus (check_and_trigger, get_hot_clusters)"],
+      "protocol": "Tag-based trails with strength, decay over time, cluster detection triggers coordinated actions"
+    }
+  ],
+  "interaction_risks": [
+    {
+      "risk": "nexus reads stale data_bus if previous agent crashed mid-write (symlink points to incomplete JSON)",
+      "severity": "medium",
+      "mitigation": "data_bus uses atomic os.rename for symlink updates, but versioned file write itself is not atomic"
+    },
+    {
+      "risk": "system_brain SQLite concurrent writes can timeout (5s) if nexus and coordinator run simultaneously",
+      "severity": "medium",
+      "mitigation": "WAL journal mode helps, but both agents write to agent_state, health, corrections tables every cycle"
+    },
+    {
+      "risk": "openclaw.json corruption causes cascading failures across task_executor, dscr_lead_gen_cron, data pipelines — observed recurring 2026-03-31 through 2026-04-01",
+      "severity": "critical",
+      "mitigation": "Multiple nexus handoffs escalated to claude_code; root cause was multi-process writes without file locking"
+    },
+    {
+      "risk": "event_bus events expire after 2h TTL — if consumer agent is down for >2h, events are lost",
+      "severity": "medium",
+      "mitigation": "peek_events does not consume, but consume_events marks as consumed; no retry queue for expired events"
+    },
+    {
+      "risk": "shared_memory ChromaDB server at localhost:8100 may be down — falls back to local JSONL keyword search (lower quality)",
+      "severity": "low",
+      "mitigation": "Graceful fallback exists, but semantic search quality degrades to simple keyword matching"
+    },
+    {
+      "risk": "nexus auto_debug can get stuck on the same error for days (observed: glint_monitor KeyError 'salary' stuck for 1887 minutes)",
+      "severity": "medium",
+      "mitigation": "nexus eventually creates handoff to claude_code, but the delay means prolonged component downtime"
+    },
+    {
+      "risk": "self_healer exhausts strategies and escalates to human via fabric handoff — but no human reads fabric handoffs in real-time",
+      "severity": "high",
+      "mitigation": "Handoffs pile up in fabric/ with status=open; nexus should consume and re-route but may miss them"
+    },
+    {
+      "risk": "daily task limit (50) could be exhausted by nexus submitting repetitive tasks for the same unresolved issue",
+      "severity": "low",
+      "mitigation": "nexus checks task_dashboard for duplicates, but similarity matching is imperfect"
+    },
+    {
+      "risk": "feedback_loop modifies trading weights and DSCR priorities every nexus cycle — no rollback if changes are harmful",
+      "severity": "medium",
+      "mitigation": "No versioning of outcome_config.json changes; feedback_loop changes are immediately live"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "timestamp": "2026-04-04T05:00:00.000Z",
+  "analysis": "Fleet Beta Squad 12 — Proactive Enhancement Opportunities",
+  "opportunities": [
+    {
+      "category": "log_rotation",
+      "component": "logs:agent-memory-server.log",
+      "observation": "16 MB, 262k lines, never rotated. Contains 12469 ERROR entries. Growing continuously with file watcher and server lifecycle events.",
+      "recommendation": "Add to resource-watchdog log rotation at 5 MB threshold. The .log.1 files exist for gateway but not for agent-memory-server.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "log_rotation",
+      "component": "logs:mission-control.log",
+      "observation": "22 MB, 301k lines, never rotated. 12.5% of content is the same Errno 48 error repeated 37672 times.",
+      "recommendation": "Rotate at 5 MB. Also fix the root cause: add SO_REUSEADDR to the TCPServer or use a process manager that waits for port release before restart.",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "log_rotation",
+      "component": "logs:gateway.log.1",
+      "observation": "gateway.log.1 is 52 MB — rotated but the rotated file itself was never cleaned up. Active gateway.log is only 325 KB.",
+      "recommendation": "Delete or compress .log.1 files after rotation. Add gzip compression to rotation script.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "log_rotation",
+      "component": "logs:gateway.err.log.1",
+      "observation": "gateway.err.log.1 is 21 MB, sitting alongside the active 784 KB file. Old rotated log never cleaned.",
+      "recommendation": "Same as gateway.log.1 — compress or delete after rotation.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "dead_code",
+      "component": "cron:twitter-jobs (5 jobs)",
+      "observation": "5 Twitter-related cron jobs all disabled: Twitter Auto-Post Morning/Midday/Evening, Twitter RE Engagement, Twitter Viral Trend Analysis. Twitter DSCR Content Automation and LinkedIn DSCR Content also disabled. Job configs still in jobs.json consuming memory and cluttering job list.",
+      "recommendation": "Archive disabled Twitter job configs to jobs_archive.json and remove from active jobs.json. Delete or archive twitter_bot workspace data.",
+      "priority": "low",
+      "effort": "low"
+    },
+    {
+      "category": "dead_code",
+      "component": "cron:disabled-jobs (15+ total)",
+      "observation": "15 disabled jobs in jobs.json: Polymarket Opportunity Scanner, Hourly Contact Enrichment, Dashboard Data Refresh, 5 Twitter jobs, Instagram Reel, whale-tracker, SMS Health Check, Enhanced Autoresearch, EVOLVE MODE, dashboard-keepalive, Escalation Alerter, Memory Server Health Monitor, Skill Optimizer, LinkedIn engagement. These add parsing overhead and confusion.",
+      "recommendation": "Move all disabled jobs to an archive file. Only keep active jobs in jobs.json.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "data_accumulation",
+      "component": "data:glint_latest_*.json",
+      "observation": "48 hourly glint snapshot files accumulating in /data/ directory. Each run creates a new timestamped file plus overwrites glint_latest.json. Old snapshots are never cleaned.",
+      "recommendation": "Add daily cleanup: keep only last 24 hourly snapshots and archive older ones. Or rotate to a single rolling file.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "data_accumulation",
+      "component": "data:kalshi_scan_*.json",
+      "observation": "48 hourly Kalshi scan files accumulating identically to glint. Same pattern: timestamped files plus a kalshi_scan.json latest pointer.",
+      "recommendation": "Same cleanup strategy as glint — keep 24h window, archive or delete older scans.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "data_accumulation",
+      "component": "data:dscr_leads_*.json",
+      "observation": "18 daily DSCR lead files with duplicate timestamps (e.g., two files per day: _190155 and _190302). Suggests pipeline running twice per day unnecessarily.",
+      "recommendation": "Deduplicate runs — check why pipeline fires twice. Clean up old daily files after upload to ActiveCampaign.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "zero_output",
+      "component": "cron:seller-financing-outreach",
+      "observation": "Seller financing agent consistently scores 816 leads but qualifies ZERO (HOT=0, WARM=0). This has been the case for every run — the job runs successfully but produces no actionable output. 4 days of runs in logs, all with identical zero output.",
+      "recommendation": "Review scoring thresholds in seller_distress.py. Either lower the qualifying bar (min_score=60 may be too high) or enrich lead data with additional distress signals to improve scoring.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "performance",
+      "component": "cron:nexus-coordinator",
+      "observation": "Runs every 30 minutes with a 49% failure rate. When it succeeds, it reports 'HEALTHY (0 Actions Taken)' but still consumes full agent session resources. Most runs are no-ops that burn LLM tokens.",
+      "recommendation": "Add a lightweight pre-check before spawning full agent session. If no alerts/actions needed, skip the expensive LLM call. Or reduce frequency to hourly.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "performance",
+      "component": "config:model-fallback-noise",
+      "observation": "Every cron job requests claude-haiku-4-5-20251001 which is 'not allowed', causing 746 fallback warnings in gateway.err.log. Each job start triggers this warning — pure noise that obscures real errors.",
+      "recommendation": "Update all job payload.model fields from 'claude-haiku-4-5-20251001' to the allowed model in agents.defaults.model.primary, or add haiku to allowed models list.",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "redundancy",
+      "component": "cron:dscr-lead-generation + cron:dscr-lead-pipeline",
+      "observation": "Two separate DSCR lead generation jobs run at the same time (both at 15:00): 'Daily DSCR Lead Generation' (6dd0958b) and 'DSCR Lead Pipeline (Daily)' (6b250f66). They use different scripts (batchdata_pipeline.py vs dscr_lead_scraper.py) but target the same outcome.",
+      "recommendation": "Consolidate into one job or stagger them. Running both at 3PM doubles API costs and creates race conditions in ActiveCampaign uploads.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "security",
+      "component": "config:openclaw.json",
+      "observation": "API keys stored in plaintext in openclaw.json env block: OPENROUTER_API_KEY, OPENAI_API_KEY. Also BatchData and ActiveCampaign keys hardcoded in cron job message payloads.",
+      "recommendation": "Move API keys to environment variables or a secrets manager. Remove from cron job payload text where they are visible in logs and run history.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "config_hygiene",
+      "component": "config:backup-files",
+      "observation": "6 backup files of openclaw.json (bak through bak.5) plus openclaw.json.lock and openclaw.json.save. 73 MB of gateway log backups. Total unnecessary disk usage from stale backups.",
+      "recommendation": "Keep only 2 most recent backups. Add automatic cleanup for .bak files older than 7 days.",
+      "priority": "low",
+      "effort": "low"
+    },
+    {
+      "category": "no_health_endpoint",
+      "component": "service:agent-memory-server",
+      "observation": "No dedicated health check endpoint. Watchdog checks mission-control port 3000 but does not verify agent-memory-server on port 8100. Server could be down without detection.",
+      "recommendation": "Add /health endpoint to agent-memory-server FastAPI app. Add port 8100 check to resource-watchdog.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "no_health_endpoint",
+      "component": "service:task-executor",
+      "observation": "Task executor has no health monitoring. It rate-limits itself for hours ('Rate limit active, skipping poll' repeated for 90+ minutes) with no external visibility into whether it is healthy or stuck.",
+      "recommendation": "Add health status endpoint or heartbeat file that watchdog can check. Expose rate limit state so operators know when executor is throttled vs dead.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "resource_waste",
+      "component": "service:chrome-browser",
+      "observation": "Chrome renderer process consuming 1 GB+ RAM for openclaw browser automation. Resource watchdog shows it as top memory consumer. Browser user-data dir is at /Users/marcmunoz/.openclaw/browser/openclaw/user-data with remote debugging on port 18800.",
+      "recommendation": "Evaluate if browser automation is still needed. If only used occasionally, launch on-demand rather than keeping persistent. Could reclaim 1 GB RAM.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "dead_code",
+      "component": "data:polymarket_bot/venv",
+      "observation": "Polymarket scanner is disabled but its workspace still contains a full Python venv, trading env, and analysis data. The bot.py, whale_tracker.py, and trading scripts are unused.",
+      "recommendation": "Since Polymarket Opportunity Scanner is disabled, archive the workspace or at minimum delete the venv to reclaim disk space.",
+      "priority": "low",
+      "effort": "low"
+    },
+    {
+      "category": "wasted_compute",
+      "component": "cron:pattern-detection-scanner",
+      "observation": "Job e7b7c843 is enabled and running but has 100% failure rate (59 errors, 0 successes in 7 days). Every run consumes LLM tokens and produces nothing.",
+      "recommendation": "Disable until root cause is fixed. Currently burning API credits every run cycle for zero value.",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "wasted_compute",
+      "component": "cron:tax-deed-scanner",
+      "observation": "Job 2a210f51 has 100% failure rate (5 errors, 0 successes). Enabled but never succeeds.",
+      "recommendation": "Disable until fixed. Investigate why all runs fail — likely missing dependency or API access issue.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "observability",
+      "component": "system:cron-error-alerting",
+      "observation": "No alerting when cron jobs enter consecutive error state. Three jobs currently at consecErrors=2 with no notification sent. Escalation Alerter job exists but is disabled.",
+      "recommendation": "Re-enable Escalation Alerter or build lightweight consecutive-error detection into the gateway. Alert on consecErrors >= 2.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "data_quality",
+      "component": "data:dscr_emails.json",
+      "observation": "DSCR email files exist (dscr_emails_20260401_*.json) but the nexus coordinator reports 'Fix data:dscr_emails: No data' as a stuck task. Data exists but downstream consumers cannot find or parse it.",
+      "recommendation": "Fix file path references in the consumption pipeline. Standardize output location for all DSCR pipeline stages.",
+      "priority": "medium",
+      "effort": "low"
+    },
+    {
+      "category": "config_hygiene",
+      "component": "workspace:workspace-dir-name",
+      "observation": "The main agent workspace directory name includes the full API key: 'workspacesk-ant-api03-q4FS2s4URwiAy8KwhGf0pDx-...'. This leaks the API key in every log entry, process listing, and config audit.",
+      "recommendation": "Rename workspace directory to remove the API key from the path. Update all references in openclaw.json.",
+      "priority": "high",
+      "effort": "medium"
+    }
+  ],
+  "summary": {
+    "total_opportunities": 24,
+    "by_priority": {
+      "high": 10,
+      "medium": 11,
+      "low": 3
+    },
+    "by_category": {
+      "log_rotation": 4,
+      "dead_code": 3,
+      "data_accumulation": 3,
+      "performance": 2,
+      "security": 1,
+      "config_hygiene": 2,
+      "no_health_endpoint": 2,
+      "resource_waste": 1,
+      "wasted_compute": 2,
+      "observability": 1,
+      "data_quality": 1,
+      "zero_output": 1,
+      "redundancy": 1
+    },
+    "quick_wins": [
+      "Disable pattern-detection-scanner and tax-deed-scanner (save API credits immediately)",
+      "Fix model spec in cron jobs from haiku to allowed model (eliminate 746 gateway warnings)",
+      "Delete gateway.log.1 and gateway.err.log.1 (reclaim 73 MB)",
+      "Add log rotation for mission-control.log and agent-memory-server.log",
+      "Re-enable Escalation Alerter for consecutive error detection"
+    ],
+    "highest_impact": [
+      "Consolidate duplicate DSCR lead gen jobs (reduce API costs, eliminate race conditions)",
+      "Fix seller-financing scoring thresholds (unlock value from 816 leads currently wasted)",
+      "Kill persistent Chrome browser when not in use (reclaim 1 GB RAM)",
+      "Rename workspace directory to remove API key from path (security fix)"
+    ]
+  }
+}

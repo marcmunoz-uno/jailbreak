@@ -1,0 +1,184 @@
+{
+  "analysis_timestamp": "2026-04-01T00:00:00Z",
+  "total_enabled_jobs": 17,
+  "max_concurrent_sessions": 4,
+  "collisions": [
+    {
+      "time": "15:00 ET (daily)",
+      "jobs": [
+        "Daily DSCR Lead Generation (6dd0958b)",
+        "DSCR Lead Pipeline Daily (6b250f66, Mon-Fri only)",
+        "Parse.bot Daily Scraper (0b0e436c)"
+      ],
+      "resource_type": ["LLM tokens", "BatchData API", "Parse.bot API", "ActiveCampaign API"],
+      "risk": "critical",
+      "reason": "3 heavy lead-generation jobs fire at exactly 15:00 ET. All require LLM orchestration, external API calls (BatchData skip trace, Parse.bot scraping, ActiveCampaign uploads), and significant execution time (56-88 seconds each). Exceeds the 4-session concurrency limit when combined with hourly jobs."
+    },
+    {
+      "time": "15:00 ET + hourly overlap",
+      "jobs": [
+        "Glint Market Monitor (5197ca32, every 1h)",
+        "Kalshi Arbitrage Scanner (7fa5f3c3, every 1h)",
+        "Paper Trading Monitor (49e0e7d4, every 1h)",
+        "Situation Monitor (03ca9343, every 30min)"
+      ],
+      "resource_type": ["LLM tokens", "Kalshi API", "Polymarket API"],
+      "risk": "high",
+      "reason": "4 hourly/30-min trading jobs overlap with the 15:00 lead-gen burst. Combined with the 3 lead-gen jobs, this creates a 7-job pileup against a 4-session concurrency limit. This is the primary cause of the rate_limit cascades observed in failure data."
+    },
+    {
+      "time": "21:00 ET (daily)",
+      "jobs": [
+        "Evening Revenue Report (00196062)",
+        "Daily Lead CSV for PropStream (92b70c7f)",
+        "Memecoin Scanner (bac2e969, 8x daily at odd hours incl 21:00)"
+      ],
+      "resource_type": ["LLM tokens", "Zillow scraping", "Gmail API"],
+      "risk": "medium",
+      "reason": "3 jobs at 21:00 ET. Evening Revenue Report and Daily Lead CSV both use LLM + email sending. Memecoin Scanner adds LLM load. Moderate contention but all are lighter jobs (18-75 second durations)."
+    },
+    {
+      "time": "08:00-08:05 ET (daily)",
+      "jobs": [
+        "Morning Briefing (90521a45, 08:00)",
+        "Daily System Health Report (5c33e967, 08:05)"
+      ],
+      "resource_type": ["LLM tokens", "metrics pipeline"],
+      "risk": "low",
+      "reason": "2 jobs staggered by 5 minutes. Both are lightweight reporting jobs. Low contention."
+    },
+    {
+      "time": "12:00 ET (daily)",
+      "jobs": [
+        "Daily Cash-Flowing Deals Email (70e90372)"
+      ],
+      "resource_type": ["LLM tokens (Sonnet)", "Zillow scraping", "image analysis", "Gmail API"],
+      "risk": "medium",
+      "reason": "Single job but uses claude-sonnet (heavier model) with 900s timeout and includes image analysis for photo screening. Duration averages 520 seconds — long-running job that blocks a session slot. Overlaps with hourly trading scanners."
+    },
+    {
+      "time": "Every 1h (continuous)",
+      "jobs": [
+        "Glint Market Monitor (5197ca32)",
+        "Kalshi Arbitrage Scanner (7fa5f3c3)",
+        "Paper Trading Monitor (49e0e7d4)",
+        "Polymarket Scanner (7b848435)"
+      ],
+      "resource_type": ["LLM tokens", "prediction market APIs"],
+      "risk": "high",
+      "reason": "4 hourly jobs all using LLM tokens. Combined with the 30-min Situation Monitor, this means 5 trading-related jobs compete for the same resources every hour. Each uses 20-70 seconds of LLM time. When they align (same anchor), all 4 fire within seconds of each other."
+    },
+    {
+      "time": "Every 30min (continuous)",
+      "jobs": [
+        "Situation Monitor (03ca9343)"
+      ],
+      "resource_type": ["LLM tokens", "web scraping"],
+      "risk": "medium",
+      "reason": "Runs every 30 minutes, doubling the frequency of hourly jobs. Creates additional contention points at the half-hour mark when combined with the 4 hourly scanners."
+    },
+    {
+      "time": "Every 2h (staggered)",
+      "jobs": [
+        "Total Recall Observer (e3ec5538, every 2h)",
+        "Total Recall Reflector (d99d8609, every 2h)",
+        "Quantitative Trading Research (0b31fe76, every 2h)",
+        "Pattern Detection Scanner (e7b7c843, every 2h)"
+      ],
+      "resource_type": ["LLM tokens (Sonnet for research)", "OpenRouter API", "memory server"],
+      "risk": "medium",
+      "reason": "4 bi-hourly jobs. Quant Research uses claude-sonnet with 900s timeout (heavy). Pattern Detection and Total Recall jobs are lighter. When these align with hourly scanners, session contention spikes."
+    },
+    {
+      "time": "Every 4h",
+      "jobs": [
+        "MiroFish Simulation Engine (f936909c, with 5min stagger)"
+      ],
+      "resource_type": ["LLM tokens", "Monte Carlo simulation"],
+      "risk": "low",
+      "reason": "Single job with built-in 5-minute stagger offset. Duration is short (11 seconds). Low contention."
+    },
+    {
+      "time": "03:00 ET (daily)",
+      "jobs": [
+        "Memory Maintenance (8757ac19)"
+      ],
+      "resource_type": ["LLM tokens", "file I/O", "mission-control updates"],
+      "risk": "low",
+      "reason": "Runs during low-activity hours. Only hourly scanners overlap. Duration ~60 seconds."
+    },
+    {
+      "time": "14:00 ET (daily)",
+      "jobs": [
+        "Tax Deed Property Scanner (2a210f51)"
+      ],
+      "resource_type": ["LLM tokens", "web scraping", "Tranchi API"],
+      "risk": "medium",
+      "reason": "Fires 1 hour before the 15:00 lead-gen burst. If it runs long, it holds a session slot into the peak contention window."
+    }
+  ],
+  "peak_contention_analysis": {
+    "worst_case_time": "15:00 ET weekdays",
+    "max_simultaneous_jobs": 7,
+    "session_limit": 4,
+    "overflow": 3,
+    "jobs_at_risk": [
+      "Daily DSCR Lead Generation",
+      "DSCR Lead Pipeline Daily",
+      "Parse.bot Daily Scraper",
+      "Glint Market Monitor",
+      "Kalshi Arbitrage Scanner",
+      "Paper Trading Monitor",
+      "Situation Monitor"
+    ],
+    "observed_failure_pattern": "Rate limit cascades at 15:00 ET are the most common failure mode. The 4-session concurrency limit means 3 jobs queue or fail. LLM token consumption from 7 simultaneous jobs triggers Anthropic rate limiting, causing 'Provider anthropic is in cooldown' errors that cascade to ALL jobs for 5-15 minutes."
+  },
+  "model_resource_map": {
+    "claude-sonnet-4-20250514": {
+      "jobs_using": [
+        "Daily Cash-Flowing Deals Email (70e90372, 900s timeout)",
+        "Quantitative Trading Research (0b31fe76, 900s timeout)"
+      ],
+      "cost_tier": "high",
+      "token_consumption": "heavy"
+    },
+    "claude-haiku-4-5-20251001": {
+      "jobs_using": [
+        "Daily DSCR Lead Generation",
+        "DSCR Lead Outreach",
+        "Glint Market Monitor",
+        "Morning Briefing",
+        "DSCR Lead Pipeline",
+        "Memory Maintenance",
+        "Evening Revenue Report",
+        "Kalshi Arbitrage Scanner",
+        "Paper Trading Monitor",
+        "Situation Monitor",
+        "Memecoin Scanner",
+        "Daily Lead CSV",
+        "Parse.bot Daily Scraper",
+        "MiroFish Simulation",
+        "Pattern Detection Scanner",
+        "Daily System Health Report",
+        "Weekly Metrics Rotation",
+        "Weekly Outcome Analysis",
+        "Tax Deed Property Scanner",
+        "Total Recall Observer",
+        "Total Recall Reflector",
+        "Weekly Content Strategy"
+      ],
+      "cost_tier": "low",
+      "token_consumption": "moderate"
+    }
+  },
+  "recommendations": [
+    "Stagger the 15:00 ET lead-gen jobs: move DSCR Lead Pipeline to 15:30, Parse.bot Daily Scraper to 14:30 — eliminates the 3-job simultaneous burst",
+    "Stagger hourly trading scanners: Glint at :00, Kalshi at :15, Paper Trading at :30, Polymarket at :45 — prevents 4-job LLM pileup",
+    "Reduce Situation Monitor from 30min to 1h interval — current 30min frequency doubles contention and historically had the most timeout failures (200+ timeouts)",
+    "Increase maxConcurrentSessions from 4 to 6 — the system regularly attempts 5-7 concurrent jobs during peak hours",
+    "Move the Daily Cash-Flowing Deals Email (12:00, 520s avg duration, uses Sonnet) to 11:00 or 13:00 to avoid overlapping with hourly scanner alignment",
+    "Add stagger offsets (staggerMs) to all hourly jobs — currently only MiroFish and Pattern Detection have stagger configured",
+    "Move Tax Deed Property Scanner from 14:00 to 13:00 to create a buffer before the 15:00 peak",
+    "Consider splitting the 21:00 cluster: move Daily Lead CSV to 20:30 or Evening Revenue Report to 21:30"
+  ]
+}

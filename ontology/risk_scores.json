@@ -1,0 +1,267 @@
+{
+  "timestamp": "2026-04-04T05:39:52.518377+00:00",
+  "analysis": "Fleet Beta Squad 10 \u2014 Component Risk Scoring",
+  "methodology": "Error rates from cron/runs/ last 7 days, watchdog state.json alerts, service log error frequency, consecutive error state",
+  "components": [
+    {
+      "id": "service:mission-control",
+      "type": "service",
+      "risk_score": 80,
+      "factors": [
+        "37672 'Address already in use' errors in mission-control.log (301k lines total)",
+        "Repeated OSError: [Errno 48] crash-restart loop on port 3000",
+        "No graceful port release \u2014 relies on process death to free socket",
+        "Currently up per watchdog, but fragile \u2014 any restart triggers cascade",
+        "[compiler] port 3000 is UP"
+      ],
+      "trend": "chronic",
+      "predicted_failure": "Next gateway restart will trigger mission-control port conflict; needs SO_REUSEADDR or process management fix"
+    },
+    {
+      "id": "service:agent-memory-server",
+      "type": "service",
+      "risk_score": 50,
+      "factors": [
+        "12469 ERROR entries in 262k-line log (4.7% error rate)",
+        "Errno 48 port 8100 binding conflicts on restart",
+        "DeprecationWarning: on_event is deprecated \u2014 future FastAPI upgrade will break",
+        "Consumes 386 MB RAM (2nd highest process)",
+        "Telemetry send failures on every startup",
+        "[compiler] port 8100 is UP"
+      ],
+      "trend": "stable but degraded",
+      "predicted_failure": "Functional now but port conflicts on restart; deprecation warnings signal future breakage on FastAPI upgrade"
+    },
+    {
+      "id": "service:gateway",
+      "type": "service",
+      "risk_score": 45,
+      "factors": [
+        "9006 lines in gateway.err.log \u2014 746 model_not_allowed warnings, 40 telegram polling stalls, 18 stale locks",
+        "Session write locks held for 842s (max 300s) \u2014 lock timeout violations",
+        "Config reload failures from unrecognized 'mcpServers' key",
+        "Group-writable homebrew dirs flagged as security risk on every exec"
+      ],
+      "trend": "stable with known issues",
+      "predicted_failure": "Operational but stale locks risk session corruption under load; config validation gaps cause reload skips"
+    },
+    {
+      "id": "service:telegram-poller",
+      "type": "service",
+      "risk_score": 40,
+      "factors": [
+        "40 polling stall events detected in gateway.err.log",
+        "Stalls of 870+ seconds before forced restart",
+        "Auto-recovery works (30s restart) but stalls cause missed messages"
+      ],
+      "trend": "stable with intermittent stalls",
+      "predicted_failure": "Self-healing but message drops during 870s stall windows; acceptable if not mission-critical"
+    },
+    {
+      "id": "cron:nexus-coordinator",
+      "type": "cron",
+      "risk_score": 50,
+      "factors": [
+        "113 errors vs 116 successes in 7 days (49% failure rate)",
+        "Job ID 78961fb4 \u2014 highest run volume with near-50% error rate",
+        "Runs every 30min \u2014 errors are intermittent timeout/resource issues",
+        "Trading halted: daily loss limit $1399 exceeded $150 cap by 9x"
+      ],
+      "trend": "volatile",
+      "predicted_failure": "High error rate but self-correcting; trading halt is safety feature working correctly"
+    },
+    {
+      "id": "cron:scout-loop",
+      "type": "cron",
+      "risk_score": 30,
+      "factors": [
+        "58 errors vs 1 success in 7 days (98% failure rate)",
+        "Job a1b2c3d4-scout-loop-nexus-0001 \u2014 now DISABLED",
+        "Was finding real issues (28 total, 15 critical) before being killed"
+      ],
+      "trend": "disabled (resolved)",
+      "predicted_failure": "No longer running; no active risk. Was resource-heavy."
+    },
+    {
+      "id": "cron:pattern-detection-scanner",
+      "type": "cron",
+      "risk_score": 55,
+      "factors": [
+        "59 errors vs 0 successes in 7 days (100% recent failure rate)",
+        "Job e7b7c843 \u2014 enabled but consistently failing",
+        "Zero successful runs detected in analyzed period"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "Effectively non-functional; needs investigation or should be disabled"
+    },
+    {
+      "id": "cron:trading-system-watchdog",
+      "type": "cron",
+      "risk_score": 45,
+      "factors": [
+        "22 errors vs 89 successes (20% failure rate)",
+        "Job 0770b44c \u2014 monitors trading but has its own reliability issues"
+      ],
+      "trend": "stable with noise",
+      "predicted_failure": "Functional but 1-in-5 runs fail; could miss real trading issues during failure windows"
+    },
+    {
+      "id": "cron:tranchi-upload",
+      "type": "cron",
+      "risk_score": 70,
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job 26fc3ddd \u2014 lastStatus=error",
+        "Daily property upload to Tranchi platform is blocked"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "Active consecutive failures \u2014 property data not reaching Tranchi; needs immediate fix"
+    },
+    {
+      "id": "cron:motivated-seller-pipeline",
+      "type": "cron",
+      "risk_score": 70,
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job a3f7c219 \u2014 lastStatus=error",
+        "Pipeline starts but appears to stall during probate scraping"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "Active failures blocking motivated seller lead flow"
+    },
+    {
+      "id": "cron:seller-financing-outreach",
+      "type": "cron",
+      "risk_score": 65,
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job 5bcad111 \u2014 lastStatus=error",
+        "Even when running successfully, finds 0 HOT and 0 WARM leads consistently",
+        "816 leads scored but zero qualify \u2014 scoring threshold may be miscalibrated"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "Broken in two ways: execution errors AND zero-output when running. Scoring logic needs review."
+    },
+    {
+      "id": "cron:polymarket-scanner",
+      "type": "cron",
+      "risk_score": 40,
+      "factors": [
+        "19 errors vs 94 successes (17% failure rate)",
+        "Job 7b848435 \u2014 generally healthy but noisy"
+      ],
+      "trend": "stable",
+      "predicted_failure": "Operational with acceptable error rate"
+    },
+    {
+      "id": "cron:total-recall-observer",
+      "type": "cron",
+      "risk_score": 45,
+      "factors": [
+        "19 errors vs 38 successes (33% failure rate)",
+        "Job e3ec5538 \u2014 one-third of runs failing"
+      ],
+      "trend": "stable but degraded",
+      "predicted_failure": "Losing observations on every third run"
+    },
+    {
+      "id": "cron:total-recall-reflector",
+      "type": "cron",
+      "risk_score": 42,
+      "factors": [
+        "18 errors vs 39 successes (32% failure rate)",
+        "Job d99d8609 \u2014 similar failure rate to observer"
+      ],
+      "trend": "stable but degraded",
+      "predicted_failure": "Paired with observer; both degraded at similar rate suggesting shared root cause"
+    },
+    {
+      "id": "cron:mirofish-simulation",
+      "type": "cron",
+      "risk_score": 42,
+      "factors": [
+        "10 errors vs 20 successes (33% failure rate)",
+        "Job f936909c \u2014 one-third failure rate"
+      ],
+      "trend": "stable",
+      "predicted_failure": "Functional but losing data on failed runs"
+    },
+    {
+      "id": "cron:tax-deed-scanner",
+      "type": "cron",
+      "risk_score": 60,
+      "factors": [
+        "5 errors vs 0 successes in 7 days (100% failure rate)",
+        "Job 2a210f51 \u2014 consistently failing",
+        "Recently enabled but not producing results"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "Non-functional; all recent runs have failed"
+    },
+    {
+      "id": "cron:evening-revenue-report",
+      "type": "cron",
+      "risk_score": 52,
+      "factors": [
+        "4 errors vs 1 success in 7 days (80% failure rate)",
+        "Job 00196062 \u2014 gateway timeouts after 30000ms",
+        "Report delivery intermittent"
+      ],
+      "trend": "degraded",
+      "predicted_failure": "Most evening reports fail to send due to gateway timeouts"
+    },
+    {
+      "id": "service:task-executor",
+      "type": "service",
+      "risk_score": 50,
+      "factors": [
+        "368 error/failed entries in 3654-line log",
+        "Rate limit spam: hours of 'Rate limit active (5 tasks/hr). Skipping poll' messages",
+        "Task 2c29fb458d3e (twitter_api self_healer) failed permanently after 3 attempts",
+        "Legacy auth-profiles fallback indicates modelAuth is unavailable"
+      ],
+      "trend": "stable but limited",
+      "predicted_failure": "Self-healing tasks fail due to auth issues; rate limiting prevents timely task processing"
+    },
+    {
+      "id": "config:openclaw.json",
+      "type": "config",
+      "risk_score": 35,
+      "factors": [
+        "6 backup files exist (openclaw.json.bak through .bak.5) suggesting frequent corruption/recovery",
+        "Unrecognized 'mcpServers' key causes config reload failures",
+        "Model 'claude-haiku-4-5-20251001' repeatedly rejected as not allowed"
+      ],
+      "trend": "stable after fixes",
+      "predicted_failure": "Config is functional but carries dead keys; haiku model fallback creates noise in every cron run"
+    },
+    {
+      "id": "system:ram",
+      "type": "infrastructure",
+      "risk_score": 70,
+      "factors": [
+        "Only 112 MB free RAM (threshold 500 MB)",
+        "Chrome renderer consuming 1 GB+ RAM",
+        "agent-memory-server at 386 MB",
+        "gateway at 235 MB",
+        "Resource watchdog flagging WARNING on every check"
+      ],
+      "trend": "worsening",
+      "predicted_failure": "System approaching OOM; Chrome browser process is primary culprit. May cause service crashes under load."
+    }
+  ],
+  "system_health": 48,
+  "top_risks": [
+    "service:mission-control",
+    "cron:tranchi-upload",
+    "cron:motivated-seller-pipeline",
+    "cron:seller-financing-outreach",
+    "system:ram",
+    "cron:tax-deed-scanner",
+    "cron:pattern-detection-scanner",
+    "service:agent-memory-server",
+    "cron:evening-revenue-report",
+    "cron:nexus-coordinator"
+  ],
+  "summary": "System health at 58/100. Three cron jobs have active consecutive failures (tranchi-upload, motivated-seller, seller-financing). Mission-control in chronic crash-restart loop. RAM critically low at 112 MB. Pattern detection scanner 100% failing. Multiple jobs running with 30-50% error rates indicating systemic resource pressure."
+}

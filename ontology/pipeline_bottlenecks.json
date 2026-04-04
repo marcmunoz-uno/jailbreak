@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-04-01T00:00:00Z",
+  "analysis": "Pipeline Bottleneck Model — Fleet Beta Squad 9",
+  "data_sources": [
+    "/Users/marcmunoz/.openclaw/cron/runs/ (30 job run log files)",
+    "/Users/marcmunoz/.openclaw/workspace/memory/cron-ledger.jsonl (68+ entries)"
+  ],
+  "bottlenecks": [
+    {
+      "pipeline": "dscr",
+      "stage": "Daily DSCR Lead Generation",
+      "job_id": "6dd0958b-910b-4381-8751-c88608475f7f",
+      "avg_duration_seconds": 3837,
+      "max_duration_seconds": 7095,
+      "runs": 5,
+      "failures": 3,
+      "failure_rate_pct": 60,
+      "is_bottleneck": true,
+      "reason": "Extremely long runtimes (avg 64min, max 118min) with 60% failure rate. Observed hanging at offset 35000 during batch processing of 36497 records. Sequential batch processing with 1000-record batches causes timeout.",
+      "optimization": "Implement parallel batch processing, add checkpoint/resume for interrupted runs, reduce batch size or add early termination on timeout. Consider pre-filtering leads before expensive processing."
+    },
+    {
+      "pipeline": "dscr",
+      "stage": "Motivated Seller Pipeline",
+      "job_id": "a3f7c219-5b4e-4d82-b8c6-1e0f9d3a6c84",
+      "avg_duration_seconds": 920,
+      "max_duration_seconds": 1417,
+      "runs": 2,
+      "failures": 2,
+      "failure_rate_pct": 100,
+      "is_bottleneck": true,
+      "reason": "100% failure rate with avg 15min runtime. Pipeline completes but fails at result submission. Both runs exceeded 15 minutes.",
+      "optimization": "Debug result submission step. Add timeout with graceful degradation. Consider splitting into sub-stages with independent success tracking."
+    },
+    {
+      "pipeline": "dscr",
+      "stage": "DSCR Multi-Touch Outreach Sequence",
+      "job_id": "daca8f37-672a-4629-8cf8-ada10d919b00",
+      "avg_duration_seconds": 297,
+      "max_duration_seconds": 423,
+      "runs": 5,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Reliable (0% failure) but moderately slow at ~5min avg. Processes 15+ contacts with multi-touch sequences including SMS and email.",
+      "optimization": "Batch API calls for skip trace and email sends. Currently appears sequential."
+    },
+    {
+      "pipeline": "dscr",
+      "stage": "Daily Tranchi Pipeline",
+      "job_id": "26fc3ddd-b51f-4840-adc6-191121e9ca1c",
+      "avg_duration_seconds": 206,
+      "max_duration_seconds": 383,
+      "runs": 3,
+      "failures": 2,
+      "failure_rate_pct": 67,
+      "is_bottleneck": true,
+      "reason": "High failure rate (67%) uploading 81 properties. Failures likely from API timeouts or data validation issues.",
+      "optimization": "Add retry logic with exponential backoff. Validate property data before upload attempt."
+    },
+    {
+      "pipeline": "dscr",
+      "stage": "Daily Lead CSV for PropStream Skip Trace",
+      "job_id": "92b70c7f-07b6-4b54-a049-3fd9d7fe095a",
+      "avg_duration_seconds": 168,
+      "max_duration_seconds": 204,
+      "runs": 5,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Reliable but includes gateway timeout for Telegram message delivery (30s wasted). Core CSV generation is fast.",
+      "optimization": "Send Telegram notification asynchronously to avoid blocking the pipeline."
+    },
+    {
+      "pipeline": "dscr",
+      "stage": "DSCR Lead Pipeline (Daily)",
+      "job_id": "6b250f66-ef12-458e-8c52-e76f1b15b579",
+      "avg_duration_seconds": 90,
+      "max_duration_seconds": 122,
+      "runs": 5,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Fast and reliable. This is the lightweight lead discovery step.",
+      "optimization": "No optimization needed — performing well."
+    },
+    {
+      "pipeline": "trading",
+      "stage": "Twitter Bot / Social Content",
+      "job_id": "06bb958f-a03b-49b4-a4e1-a9bb89d1c664",
+      "avg_duration_seconds": 410,
+      "max_duration_seconds": 557,
+      "runs": 5,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Reliable but slow (~7min avg). Content generation with LLM calls dominates runtime.",
+      "optimization": "Cache common content templates. Pre-generate content during off-peak circadian phases."
+    },
+    {
+      "pipeline": "trading",
+      "stage": "MiroFish Real-Time Pipeline",
+      "job_id": "8b42d58f-bccf-439b-b2c5-794568d05e1e",
+      "avg_duration_seconds": 150,
+      "max_duration_seconds": 394,
+      "runs": 5,
+      "failures": 3,
+      "failure_rate_pct": 60,
+      "is_bottleneck": true,
+      "reason": "High failure rate (60%) with variable duration (2.5min avg, 6.5min max). Pipeline status analysis takes too long when data sources are degraded.",
+      "optimization": "Add fast-fail on degraded dependencies. Cache previous pipeline status for comparison."
+    },
+    {
+      "pipeline": "trading",
+      "stage": "Daily Cash-Flowing Deals Email",
+      "job_id": "70e90372-6073-4571-98a2-aadb7d916268",
+      "avg_duration_seconds": 198,
+      "max_duration_seconds": 245,
+      "runs": 5,
+      "failures": 4,
+      "failure_rate_pct": 80,
+      "is_bottleneck": true,
+      "reason": "80% failure rate despite photo screening 643 properties. Failures in email delivery (webhook server issues). When it works, sends 3 qualifying properties.",
+      "optimization": "Fix email delivery pipeline. Add retry for webhook failures. Separate property screening from email sending."
+    },
+    {
+      "pipeline": "content",
+      "stage": "Parse.bot Daily Scraper",
+      "job_id": "0b0e436c-770f-4c87-ad63-c87a91c9eea4",
+      "avg_duration_seconds": 127,
+      "max_duration_seconds": 351,
+      "runs": 5,
+      "failures": 1,
+      "failure_rate_pct": 20,
+      "is_bottleneck": false,
+      "reason": "Script reported as MISSING in status report. Moderate reliability issue.",
+      "optimization": "Verify script exists at expected path. Add pre-flight check before cron execution."
+    },
+    {
+      "pipeline": "monitoring",
+      "stage": "Situation Monitor — Geopolitical Edge Scanner",
+      "job_id": "03ca9343 (ledger)",
+      "avg_duration_seconds": 8,
+      "max_duration_seconds": 25,
+      "runs": 16,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Fast and reliable. Scans 1060 markets, detects 165 edges in ~8s. Best-performing pipeline stage.",
+      "optimization": "No optimization needed."
+    },
+    {
+      "pipeline": "monitoring",
+      "stage": "Critical Health Monitor",
+      "job_id": "01c296e1-cdab-4068-9333-8a1ebc4a79da",
+      "avg_duration_seconds": 116,
+      "max_duration_seconds": 338,
+      "runs": 5,
+      "failures": 0,
+      "failure_rate_pct": 0,
+      "is_bottleneck": false,
+      "reason": "Reports SYSTEM FAILURE status frequently but completes reliably. Gateway timeout on job execution (30s) inflates duration.",
+      "optimization": "Reduce Telegram gateway timeout. Consider async notification."
+    }
+  ],
+  "pipeline_total_times": {
+    "dscr": {
+      "avg_seconds": 4718,
+      "stages": 6,
+      "critical_path": "Daily DSCR Lead Generation (3837s avg) -> Outreach (297s avg) -> Skip Trace CSV (168s avg) -> Lead Pipeline (90s avg)",
+      "bottleneck_stage": "Daily DSCR Lead Generation",
+      "bottleneck_pct_of_total": 81,
+      "notes": "The lead generation stage dominates at 81% of total pipeline time. Fixing this alone would reduce pipeline time by ~60min."
+    },
+    "trading": {
+      "avg_seconds": 758,
+      "stages": 4,
+      "critical_path": "Social Content (410s) -> Deals Email (198s) -> MiroFish (150s)",
+      "bottleneck_stage": "Daily Cash-Flowing Deals Email (80% failure rate)",
+      "notes": "Duration is acceptable but failure rates are very high. Email delivery is the weakest link."
+    },
+    "monitoring": {
+      "avg_seconds": 124,
+      "stages": 2,
+      "critical_path": "Health Monitor (116s) -> Situation Scanner (8s)",
+      "bottleneck_stage": "None — both stages are fast and reliable",
+      "notes": "Well-optimized pipeline. Geopolitical scanner is especially efficient."
+    },
+    "content": {
+      "avg_seconds": 346,
+      "stages": 4,
+      "critical_path": "Instagram Reels (104s) -> LinkedIn (115s) -> Twitter DSCR (94s) -> Parse.bot (127s)",
+      "bottleneck_stage": "None — all stages under 3min",
+      "notes": "Content pipeline is distributed across platforms with no single bottleneck."
+    },
+    "research": {
+      "avg_seconds": 106,
+      "stages": 1,
+      "critical_path": "Quantitative Trading Research (106s avg)",
+      "bottleneck_stage": "None",
+      "notes": "Single-stage pipeline, performs well."
+    }
+  },
+  "top_optimizations": [
+    {
+      "priority": 1,
+      "target": "Daily DSCR Lead Generation",
+      "impact": "Reduce 64min avg to <10min, eliminate 60% failure rate",
+      "effort": "medium",
+      "action": "Implement parallel batch processing with checkpoint/resume. Current sequential offset-based batching of 36K+ records causes timeouts. Add early termination and progress persistence."
+    },
+    {
+      "priority": 2,
+      "target": "Daily Cash-Flowing Deals Email",
+      "impact": "Fix 80% failure rate, restore daily revenue-generating emails",
+      "effort": "low",
+      "action": "Fix webhook server startup and email delivery. Separate property screening (works) from email sending (fails). Add retry logic."
+    },
+    {
+      "priority": 3,
+      "target": "MiroFish Real-Time Pipeline",
+      "impact": "Fix 60% failure rate in trading monitoring",
+      "effort": "low",
+      "action": "Add fast-fail when upstream data sources are degraded instead of spending 6+ minutes discovering failures."
+    },
+    {
+      "priority": 4,
+      "target": "Motivated Seller Pipeline",
+      "impact": "Fix 100% failure rate in high-value lead pipeline",
+      "effort": "medium",
+      "action": "Debug result submission step. Pipeline processes successfully but fails to persist/report results."
+    },
+    {
+      "priority": 5,
+      "target": "Telegram gateway timeouts",
+      "impact": "Save 30s per affected job (multiple jobs), improve apparent reliability",
+      "effort": "low",
+      "action": "Send Telegram notifications asynchronously (fire-and-forget with separate retry queue) instead of blocking pipeline execution."
+    }
+  ]
+}

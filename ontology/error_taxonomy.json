@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-04-04T05:30:00Z",
+  "analysis_scope": "cron-ledger-error.jsonl, glint-monitor-error.log, quant-research-cron-failure.jsonl, gateway.err.log (last 200 lines), workspace/logs/*.log (all ERROR/FAIL/Exception lines)",
+  "error_classes": [
+    {
+      "class": "proxy_connection_blocked",
+      "pattern": "ProxyError('Unable to connect to proxy', OSError('Tunnel connection failed: 403 Forbidden'))",
+      "occurrences": 1622,
+      "affected_components": ["glint-monitor", "kalshi-resolver", "mirofish", "quant-research", "trade-engine"],
+      "root_cause": "HTTP proxy (likely set via environment variables HTTP_PROXY/HTTPS_PROXY) blocks outbound HTTPS connections to external APIs like glint.trade, kalshi.com, and others. The proxy returns 403 Forbidden for tunneled connections.",
+      "fix_applied": false,
+      "recurrence_risk": "high",
+      "remediation": "Jobs that strip proxy env vars (unset HTTP_PROXY) before running avoid this. Python scripts launched directly inherit proxy settings and fail. Fix: add proxy stripping to all python scripts or remove proxy from agent environment."
+    },
+    {
+      "class": "model_deprecation",
+      "pattern": "payload.model 'claude-haiku-4-5-20251001' not allowed, falling back to agent defaults",
+      "occurrences": 746,
+      "affected_components": ["cron-scheduler"],
+      "root_cause": "Deprecated model ID 'claude-haiku-4-5-20251001' is still configured in 20+ job payloads. The gateway rejects it and falls back to agent defaults, generating a warning on every cron trigger.",
+      "fix_applied": false,
+      "recurrence_risk": "high",
+      "remediation": "Update all job payloads in jobs.json to use an allowed model ID. This generates hundreds of log lines per day and obscures real errors in gateway.err.log."
+    },
+    {
+      "class": "uncategorized_script_failures",
+      "pattern": "Research failed (exit 1), Script execution errors, various runtime failures",
+      "occurrences": 651,
+      "affected_components": ["glint-monitor", "gov-tax-deed-scraper", "observer", "quant-research", "reflector"],
+      "root_cause": "Multiple python scripts and shell scripts failing with non-zero exit codes. Common causes include missing dependencies, stale data, and environment issues.",
+      "fix_applied": false,
+      "recurrence_risk": "high",
+      "remediation": "Add structured error logging to all scripts so failures can be categorized. Currently many just log generic 'failed (exit 1)' without details."
+    },
+    {
+      "class": "auth_permission_error",
+      "pattern": "HTTP 403/401 responses from external APIs",
+      "occurrences": 227,
+      "affected_components": ["glint-monitor", "quant-research", "reflector", "trade-engine"],
+      "root_cause": "External APIs returning authentication or permission errors. Likely caused by expired API keys, rate limiting, or IP-based blocking.",
+      "fix_applied": false,
+      "recurrence_risk": "high",
+      "remediation": "Audit all API keys for expiration. Implement key rotation and rate limit backoff logic."
+    },
+    {
+      "class": "telegram_polling_stall",
+      "pattern": "Polling stall detected (no getUpdates for Ns); forcing restart",
+      "occurrences": 40,
+      "affected_components": ["telegram"],
+      "root_cause": "Long-running agent sessions (some exceeding 15+ minutes) block the Telegram polling event loop. When getUpdates hasn't been called for 300-1000+ seconds, the system forces a restart.",
+      "fix_applied": false,
+      "recurrence_risk": "medium",
+      "remediation": "Decouple Telegram polling from agent execution. Run polling in a separate thread/process that is not blocked by agent sessions."
+    },
+    {
+      "class": "api_provider_timeout",
+      "pattern": "Profile anthropic:default timed out. Trying next account...",
+      "occurrences": 24,
+      "affected_components": ["agent-embedded"],
+      "root_cause": "Anthropic API not responding within the timeout window. Often correlated with telegram polling stalls, suggesting the system is overloaded.",
+      "fix_applied": false,
+      "recurrence_risk": "medium",
+      "remediation": "Increase timeout windows or reduce concurrent agent sessions. Consider rate-limiting cron job execution to avoid overwhelming the API."
+    },
+    {
+      "class": "web_fetch_blocked",
+      "pattern": "Web fetch failed (403): Cloudflare 'Just a moment...' challenge page",
+      "occurrences": 15,
+      "affected_components": ["tools"],
+      "root_cause": "Target websites (Cloudflare-protected) blocking automated web_fetch requests with 403 and returning challenge pages.",
+      "fix_applied": false,
+      "recurrence_risk": "medium",
+      "remediation": "Use headless browser or API endpoints instead of direct web_fetch for Cloudflare-protected sites."
+    },
+    {
+      "class": "session_lock_timeout",
+      "pattern": "releasing lock held for Nms (max=Nms)",
+      "occurrences": 8,
+      "affected_components": ["session-manager"],
+      "root_cause": "Agent sessions exceeding maximum lock duration (300-720 seconds). Lock held for 500-1400 seconds in worst cases. Indicates agent tasks taking much longer than expected.",
+      "fix_applied": false,
+      "recurrence_risk": "medium",
+      "remediation": "Enforce stricter timeoutSeconds on job payloads. Monitor which jobs are causing long sessions and optimize them."
+    },
+    {
+      "class": "telegram_network_failure",
+      "pattern": "Network request for 'sendMessage'/'sendChatAction' failed!",
+      "occurrences": 9,
+      "affected_components": ["telegram"],
+      "root_cause": "Network connectivity issues to Telegram API, possibly caused by DNS resolution failures or temporary network outages.",
+      "fix_applied": false,
+      "recurrence_risk": "low",
+      "remediation": "Already has fallback (autoSelectFamily=false + dnsResultOrder=ipv4first). Transient issue."
+    },
+    {
+      "class": "missing_script_path",
+      "pattern": "Script not found: /Users/marcmunoz/.openclaw/workspace/skills/*/scripts/run.sh",
+      "occurrences": 4,
+      "affected_components": ["quant-research-trade-engine", "glint-monitor"],
+      "root_cause": "Scheduled tasks reference host filesystem paths that do not exist in the sandbox environment. The .openclaw workspace directory is not mounted in Cowork sessions.",
+      "fix_applied": false,
+      "recurrence_risk": "low",
+      "remediation": "These errors come from legacy sandbox-based execution. Tasks now run directly via Claude Code agent and bypass these scripts."
+    },
+    {
+      "class": "config_validation_error",
+      "pattern": "Unrecognized key: 'mcpServers'",
+      "occurrences": 3,
+      "affected_components": ["config-reloader"],
+      "root_cause": "Configuration file contains 'mcpServers' key which the config validator does not recognize. Config reload is skipped.",
+      "fix_applied": true,
+      "recurrence_risk": "low",
+      "remediation": "Move mcpServers to the correct configuration location or update validator to accept it."
+    },
+    {
+      "class": "tool_usage_error",
+      "pattern": "Could not find the exact text in memory/cron-ledger.jsonl",
+      "occurrences": 2,
+      "affected_components": ["tools"],
+      "root_cause": "Agent attempted to edit a file using stale or incorrect text match. The file content changed between read and edit attempts.",
+      "fix_applied": false,
+      "recurrence_risk": "low",
+      "remediation": "Use append operations instead of edit for log files like cron-ledger.jsonl."
+    },
+    {
+      "class": "agent_execution_timeout",
+      "pattern": "embedded run timeout: runId=... timeoutMs=600000",
+      "occurrences": 1,
+      "affected_components": ["agent-embedded"],
+      "root_cause": "Agent task exceeded the 10-minute (600000ms) execution limit.",
+      "fix_applied": false,
+      "recurrence_risk": "low",
+      "remediation": "Break long-running tasks into smaller chunks or increase timeout for complex jobs."
+    }
+  ],
+  "total_errors_analyzed": 3346,
+  "top_3_by_frequency": [
+    "proxy_connection_blocked (1622 occurrences - 48.5%)",
+    "model_deprecation (746 occurrences - 22.3%)",
+    "uncategorized_script_failures (651 occurrences - 19.5%)"
+  ],
+  "critical_findings": {
+    "top_issue": "Proxy blocking accounts for nearly half of all errors. Five components affected. Fix by stripping proxy env vars in all python scripts.",
+    "quick_win": "Updating model ID from 'claude-haiku-4-5-20251001' to an allowed model in jobs.json would eliminate 22% of all gateway errors instantly.",
+    "systemic_risk": "Telegram polling stalls + session lock timeouts + API provider timeouts form a correlated failure chain. When one triggers, the others cascade."
+  }
+}

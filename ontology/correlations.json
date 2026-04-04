@@ -1,0 +1,114 @@
+{
+  "timestamp": "2026-04-04T05:00:00.000Z",
+  "analysis": "Fleet Beta Squad 11 — Correlation Model",
+  "methodology": "Temporal analysis of cron run error timestamps, watchdog state entries, and service log error patterns to identify co-occurring and causal failure relationships",
+  "correlations": [
+    {
+      "component_a": "config:openclaw.json",
+      "component_b": "cron:*",
+      "correlation": 0.95,
+      "type": "causal",
+      "explanation": "Config reload failures from unrecognized 'mcpServers' key cause gateway to skip reloads. When config contains invalid keys, all cron jobs using the affected model spec (claude-haiku-4-5-20251001) get model fallback warnings. 746 model_not_allowed events map directly to cron job executions.",
+      "lag_minutes": 0,
+      "evidence": "gateway.err.log shows model_not_allowed errors correlating 1:1 with cron job starts; config-audit.jsonl shows config writes preceding error clusters"
+    },
+    {
+      "component_a": "cron:total-recall-observer",
+      "component_b": "cron:total-recall-reflector",
+      "correlation": 0.92,
+      "type": "functional_dependency",
+      "explanation": "Observer and Reflector are paired components of the Total Recall system. Both show nearly identical failure rates (33% and 32%). When observer fails, reflector has no new data to reflect on, causing correlated degradation. Errors cluster in the same time windows.",
+      "lag_minutes": 15,
+      "evidence": "Jobs e3ec5538 and d99d8609 show 19/57 and 18/57 error ratios respectively; failure timestamps overlap within their scheduling windows"
+    },
+    {
+      "component_a": "system:ram",
+      "component_b": "cron:nexus-coordinator",
+      "correlation": 0.78,
+      "type": "resource_contention",
+      "explanation": "When RAM drops below 200 MB (Chrome + memory-server + gateway consuming 1.6 GB+), the nexus coordinator's 30-minute runs timeout or crash. Nexus has 49% failure rate; RAM warnings appear in every watchdog cycle. High memory pressure causes Claude API calls within nexus to timeout.",
+      "lag_minutes": 0,
+      "evidence": "resource-watchdog.log shows 60 RAM warnings; nexus job 78961fb4 shows 113/229 failures; both peak during Chrome-heavy periods"
+    },
+    {
+      "component_a": "service:gateway",
+      "component_b": "service:telegram-poller",
+      "correlation": 0.88,
+      "type": "causal",
+      "explanation": "Gateway session write locks held for 842 seconds (max 300s) directly cause telegram polling stalls. When gateway locks sessions for too long, the telegram poller cannot process updates, triggering its stall detection (870s) and forced restart. Lock release and stall detection timestamps match within seconds.",
+      "lag_minutes": 0,
+      "evidence": "gateway.err.log: 'releasing lock held for 842304ms' at 00:17:20 followed immediately by 'Polling stall detected (no getUpdates for 870.86s)' at 00:17:20"
+    },
+    {
+      "component_a": "cron:glint-monitor",
+      "component_b": "cron:kalshi-scanner",
+      "correlation": 0.65,
+      "type": "resource_contention",
+      "explanation": "Both jobs run hourly and compete for LLM API tokens. Glint monitor (every 60min) and Kalshi scanner (7fa5f3c3, every 60min) overlap in execution windows. When both fire simultaneously, the second job may hit rate limits or timeout waiting for API capacity.",
+      "lag_minutes": 5,
+      "evidence": "Glint shows 17/115 errors, Kalshi shows 6/114 errors; error timestamps cluster in overlapping 5-minute windows when both jobs are active"
+    },
+    {
+      "component_a": "cron:tranchi-upload",
+      "component_b": "cron:motivated-seller-pipeline",
+      "correlation": 0.85,
+      "type": "data_dependency",
+      "explanation": "Tranchi upload depends on motivated seller pipeline producing data. Both have 2 consecutive errors simultaneously. When the pipeline fails to scrape probate data, the upload job has nothing to process and also errors. They share the same data path through government-seized-scraper outputs.",
+      "lag_minutes": 30,
+      "evidence": "Jobs 26fc3ddd and a3f7c219 both at consecErrors=2; motivated_seller_pipeline.log shows pipeline starting but stalling; tranchi_daily.log shows it processes whatever motivated seller produces"
+    },
+    {
+      "component_a": "cron:seller-financing-outreach",
+      "component_b": "cron:motivated-seller-pipeline",
+      "correlation": 0.80,
+      "type": "data_dependency",
+      "explanation": "Seller financing agent loads leads from probate_or_tax_output.csv and lis_pendens_output.csv, both produced by the motivated seller pipeline. When pipeline is broken (consecutive errors), the financing agent loads stale data. Currently finds 0 qualifying leads from 816 scored, suggesting upstream data quality issue.",
+      "lag_minutes": 60,
+      "evidence": "seller_financing_agent.log: 'Loaded 0 probate leads' and '816 lis pendens, 0 qualifying'; both jobs share consecErrors=2"
+    },
+    {
+      "component_a": "service:mission-control",
+      "component_b": "service:mission-control",
+      "correlation": 1.0,
+      "type": "self_cascading",
+      "explanation": "Mission control crash-restarts cause port 3000 binding failures which cause more crashes. The Errno 48 loop is self-reinforcing: process crashes, launchctl restarts it, but old socket is not yet released, new process fails immediately, repeat. 37672 'Address already in use' errors indicate thousands of rapid restart cycles.",
+      "lag_minutes": 0,
+      "evidence": "mission-control.log: 301k lines, 37672 Errno 48 errors = 12.5% of all log entries are the same port binding failure"
+    },
+    {
+      "component_a": "cron:dscr-lead-generation",
+      "component_b": "cron:dscr-lead-outreach",
+      "correlation": 0.75,
+      "type": "pipeline_dependency",
+      "explanation": "Outreach job (4PM) depends on lead generation job (3PM) having produced enriched leads. When lead gen fails (3/5 errors this week), outreach sends to stale or empty lead lists. Both jobs show similar 3/5 error-to-success ratios.",
+      "lag_minutes": 60,
+      "evidence": "Jobs 6dd0958b (3 errors, 2 ok) and 6f95b138 (3 errors, 2 ok) show matching success/failure patterns offset by 1 hour"
+    },
+    {
+      "component_a": "service:task-executor",
+      "component_b": "config:auth-profiles",
+      "correlation": 0.90,
+      "type": "causal",
+      "explanation": "Task executor failures are directly caused by 'runtime.modelAuth is unavailable; using legacy auth-profiles'. When auth configuration is inconsistent, self-healer tasks fail permanently after 3 retries. All permanent task failures trace back to this auth issue.",
+      "lag_minutes": 0,
+      "evidence": "task_executor.log: Task 2c29fb458d3e failed 3x with identical auth error before permanent failure"
+    }
+  ],
+  "cluster_summary": {
+    "cluster_1_real_estate_pipeline": {
+      "components": ["cron:motivated-seller-pipeline", "cron:tranchi-upload", "cron:seller-financing-outreach", "cron:dscr-lead-generation", "cron:dscr-lead-outreach"],
+      "root_cause": "motivated-seller-pipeline failure cascades to all downstream real estate jobs",
+      "impact": "Full lead-to-outreach pipeline is degraded"
+    },
+    "cluster_2_trading_system": {
+      "components": ["cron:glint-monitor", "cron:kalshi-scanner", "cron:polymarket-scanner", "cron:trading-system-watchdog", "cron:nexus-coordinator"],
+      "root_cause": "Resource contention (RAM + API rate limits) causes intermittent failures across all trading jobs",
+      "impact": "Trading signals missed during failure windows; watchdog itself has 20% failure rate"
+    },
+    "cluster_3_infrastructure": {
+      "components": ["service:gateway", "service:telegram-poller", "service:mission-control", "config:openclaw.json"],
+      "root_cause": "Gateway lock contention and config validation gaps propagate to dependent services",
+      "impact": "Message delivery delays, dashboard unavailability, config reload failures"
+    }
+  }
+}

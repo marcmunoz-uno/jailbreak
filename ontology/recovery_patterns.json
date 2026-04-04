@@ -1,0 +1,180 @@
+{
+  "generated_at": "2026-04-01T00:00:00Z",
+  "analysis": "Recovery Pattern Model — Fleet Beta Squad 8",
+  "source_files_scanned": 95,
+  "patterns": [
+    {
+      "problem": "openclaw.json corruption — Invalid config at /Users/marcmunoz/.openclaw/openclaw.json",
+      "fix": "Diagnosed as multi-process concurrent writes corrupting JSON. Multiple nexus handoffs escalated to claude_code requesting atomic config writer with file locking and robust schema validation.",
+      "date": "2026-03-31",
+      "recurred": true,
+      "recurrence_details": "First seen 2026-03-31T18:01Z, recurred at 2026-03-31T23:51Z, 2026-04-01T00:00Z, 2026-04-01T00:30Z — at least 4 critical handoffs over 6+ hours. Root cause persisted across cycles.",
+      "confidence": "high",
+      "severity": "critical",
+      "applicable_to": ["any config file written by multiple processes", "openclaw.json", "task_executor", "dscr_lead_gen_cron", "data:dscr_traced", "data:dscr_emails"],
+      "fabric_refs": [
+        "nexus-handoff-2026-03-31T1801Z-8eef.md",
+        "nexus-handoff-2026-03-31T2101Z-8df1.md",
+        "nexus-handoff-2026-03-31T2351Z-fea1.md",
+        "nexus-handoff-2026-04-01T0000Z-a364.md",
+        "nexus-handoff-2026-04-01T0030Z-6ff8.md"
+      ]
+    },
+    {
+      "problem": "dscr_leads data stale — 3352 minutes old, blocking entire DSCR pipeline",
+      "fix": "Coordinator auto-detected staleness and created self-heal handoff. data_bus publish() with legacy /tmp fallback was the mitigation. Lead scraper needed restart.",
+      "date": "2026-03-30",
+      "recurred": true,
+      "recurrence_details": "dscr_leads, dscr_traced, and dscr_emails all went stale simultaneously. dscr_lead_gen_cron showed 0% success rate by 2026-04-02.",
+      "confidence": "high",
+      "severity": "high",
+      "applicable_to": ["dscr_lead_scraper", "dscr_agent", "data_bus channels"],
+      "fabric_refs": [
+        "coordinator-handoff-2026-03-30T0311Z-9709.md",
+        "coordinator-handoff-2026-03-30T0311Z-4e19.md",
+        "coordinator-handoff-2026-03-30T0311Z-c43b.md",
+        "self_healer-handoff-2026-04-02T1100Z-f4d2.md"
+      ]
+    },
+    {
+      "problem": "glint_monitor KeyError: 'salary' in line 42 — component stuck failing for 1887+ minutes",
+      "fix": "auto_debugger attempted diagnosis but got stuck. Nexus escalated to claude_code via handoff to directly investigate and patch the KeyError in glint_monitor.py.",
+      "date": "2026-03-31",
+      "recurred": false,
+      "recurrence_details": "Single long-duration incident. auto_debugger could not self-resolve, indicating missing field in data schema.",
+      "confidence": "medium",
+      "severity": "medium",
+      "applicable_to": ["glint_monitor", "any script parsing external API data with assumed field names"],
+      "fabric_refs": [
+        "nexus-handoff-2026-03-31T1419Z-7b8b.md",
+        "coordinator-handoff-2026-03-30T0831Z-747d.md",
+        "coordinator-handoff-2026-03-30T0831Z-b784.md"
+      ]
+    },
+    {
+      "problem": "task_executor failures — plugins.allow is empty; discovered non-bundled plugins",
+      "fix": "Coordinator detected task_executor failing with plugin configuration error. Required openclaw plugin allow-list configuration update.",
+      "date": "2026-03-30",
+      "recurred": true,
+      "recurrence_details": "Linked to openclaw.json corruption — when config became invalid, task_executor could not load plugin whitelist, causing cascading task failures (76+ failed tasks observed).",
+      "confidence": "high",
+      "severity": "high",
+      "applicable_to": ["task_executor", "openclaw plugin system", "any component reading openclaw.json"],
+      "fabric_refs": [
+        "coordinator-handoff-2026-03-30T0704Z-d917.md"
+      ]
+    },
+    {
+      "problem": "mailgun SPF/DKIM DNS records pending — email deliverability degraded",
+      "fix": "Nexus identified mailgun component as degraded due to missing DNS records. Handoff to claude_code to configure SPF and DKIM records for the sending domain.",
+      "date": "2026-03-31",
+      "recurred": true,
+      "recurrence_details": "Two separate handoffs created 30 minutes apart (2026-03-31T19:30Z and 2026-03-31T20:30Z), indicating the fix was not applied between cycles.",
+      "confidence": "medium",
+      "severity": "medium",
+      "applicable_to": ["mailgun", "email outreach pipeline", "DNS configuration"],
+      "fabric_refs": [
+        "nexus-handoff-2026-03-31T1930Z-d69e.md",
+        "nexus-handoff-2026-03-31T2030Z-047c.md"
+      ]
+    },
+    {
+      "problem": "trading watchdog RED alert — missing/failing trade engine component",
+      "fix": "Hermes detected via monitoring and sent critical alert to Claude Code through established communication channel (fabric + event_bus). Trading pipeline deployment from 2026-03-26 had gaps.",
+      "date": "2026-03-30",
+      "recurred": false,
+      "recurrence_details": "One-time alert that triggered cross-agent coordination (hermes -> claude_code).",
+      "confidence": "high",
+      "severity": "high",
+      "applicable_to": ["trade_engine", "trading pipeline", "paper_trading_monitor"],
+      "fabric_refs": [
+        "hermes-decision-2026-03-30T1854Z-616a.md"
+      ]
+    },
+    {
+      "problem": "RAM exhaustion — only 406 MB free",
+      "fix": "Coordinator auto-detected low memory and created self-heal handoff. Likely caused by accumulated cron job processes not properly releasing memory.",
+      "date": "2026-03-31",
+      "recurred": false,
+      "recurrence_details": "Single incident detected at 2026-03-31T04:31Z.",
+      "confidence": "medium",
+      "severity": "medium",
+      "applicable_to": ["system resources", "cron jobs", "long-running agents"],
+      "fabric_refs": [
+        "coordinator-handoff-2026-03-31T0431Z-9916.md"
+      ]
+    },
+    {
+      "problem": "dscr_outreach_cron and twitter_api — self_healer exhausted all strategies",
+      "fix": "self_healer attempted all recovery strategies and performed rollback. Escalated to coordinator via handoff. Manual intervention needed for API authentication issues.",
+      "date": "2026-04-02",
+      "recurred": false,
+      "recurrence_details": "Both components failed within 12 minutes of each other, suggesting shared dependency (possibly API credentials or network).",
+      "confidence": "medium",
+      "severity": "medium",
+      "applicable_to": ["dscr_outreach_cron", "twitter_api", "any component requiring external API keys"],
+      "fabric_refs": [
+        "coordinator-handoff-2026-04-02T0801Z-b0da.md",
+        "coordinator-handoff-2026-04-02T0813Z-1a09.md",
+        "coordinator-handoff-2026-04-02T0813Z-f411.md"
+      ]
+    },
+    {
+      "problem": "Polymarket Scanner bot hanging during execution",
+      "fix": "Cron job completed but scanner hung during market scanning. Likely timeout or rate-limit issue with Polymarket API.",
+      "date": "2026-04-02",
+      "recurred": false,
+      "recurrence_details": "Single occurrence observed in cron fabric entry.",
+      "confidence": "low",
+      "severity": "low",
+      "applicable_to": ["polymarket_scanner", "external API scrapers"],
+      "fabric_refs": [
+        "cold/openclaw-task-2026-04-02T0003Z-a1df.md"
+      ]
+    },
+    {
+      "problem": "Icarus shared memory protocol installation — cross-agent session continuity gap",
+      "fix": "Installed fabric-based session memory: Claude Code gets auto-write on Stop + auto-load on SessionStart. Hermes gets fabric-memory plugin with 4 lifecycle hooks. OpenClaw integration pending.",
+      "date": "2026-03-30",
+      "recurred": false,
+      "recurrence_details": "Infrastructure improvement, not a failure. Addresses the root problem of agents losing context between sessions.",
+      "confidence": "high",
+      "severity": "low",
+      "applicable_to": ["all agents", "session continuity", "fabric protocol"],
+      "fabric_refs": [
+        "claude-code-decision-2026-03-30T0109Z-a924.md"
+      ]
+    },
+    {
+      "problem": "Missing /tmp temp files causing pipeline failures",
+      "fix": "Hermes deployed autonomous fix: recreated 5 missing critical temp files with safe defaults. Part of autonomous learning system deployment.",
+      "date": "2026-03-31",
+      "recurred": false,
+      "recurrence_details": "Resolved by hermes autonomous deployment. data_bus migration from /tmp to /Users/marcmunoz/.openclaw/data/ with legacy fallback should prevent future occurrences.",
+      "confidence": "high",
+      "severity": "medium",
+      "applicable_to": ["data_bus legacy paths", "any script reading from /tmp"],
+      "fabric_refs": [
+        "hermes-decision-2026-03-31T0215Z-0295.md"
+      ]
+    }
+  ],
+  "meta_patterns": [
+    {
+      "pattern": "Config corruption is the single most damaging failure mode — openclaw.json corruption caused cascading failures across 4+ components for 6+ hours",
+      "recommendation": "Implement atomic writes with file locking for all shared config files. Add config validation on read with fallback to last-known-good copy."
+    },
+    {
+      "pattern": "Self-healer escalation path has a dead end — escalates to 'human' via fabric but no human monitors fabric in real-time",
+      "recommendation": "Route self_healer exhaustion handoffs to nexus or claude_code instead of human. Add telegram alert for unresolved critical handoffs."
+    },
+    {
+      "pattern": "auto_debugger gets stuck on errors it cannot resolve — observed stuck for 1887+ minutes on glint_monitor",
+      "recommendation": "Add timeout/escalation logic: if auto_debugger cannot resolve within 30 minutes, automatically create handoff to claude_code."
+    },
+    {
+      "pattern": "Data staleness detection works but resolution is slow — coordinator detects stale data but creating handoffs does not guarantee timely fix",
+      "recommendation": "Add direct restart capability to coordinator/nexus for data pipeline scripts, not just handoff creation."
+    }
+  ]
+}

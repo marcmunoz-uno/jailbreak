@@ -1,0 +1,727 @@
+{
+  "timestamp": "2026-04-04T05:39:52.550023+00:00",
+  "system_health": 80,
+  "health_breakdown": {
+    "services": {
+      "score": 100,
+      "details": [
+        {
+          "id": "service:openclaw-gateway",
+          "status": "up",
+          "port": 18789
+        },
+        {
+          "id": "service:mission-control",
+          "status": "up",
+          "port": 3000
+        },
+        {
+          "id": "service:hermes-gateway",
+          "status": "up",
+          "port": 8642
+        },
+        {
+          "id": "service:godmode-api",
+          "status": "up",
+          "port": 7860
+        },
+        {
+          "id": "service:agent-memory-server",
+          "status": "up",
+          "port": 8100
+        }
+      ]
+    },
+    "configs": {
+      "score": 84,
+      "details": [
+        {
+          "id": "config:openclaw.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "high"
+        },
+        {
+          "id": "config:jobs.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "medium"
+        },
+        {
+          "id": "config:mcp.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "low"
+        },
+        {
+          "id": "config:outcome_config.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "medium"
+        },
+        {
+          "id": "config:trade_engine_config.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "none"
+        },
+        {
+          "id": "config:strategy_library.json",
+          "exists": false,
+          "valid_json": false,
+          "drift_risk": "none"
+        },
+        {
+          "id": "config:calibration_data.json",
+          "exists": true,
+          "valid_json": true,
+          "drift_risk": "none"
+        },
+        {
+          "id": "config:data.json",
+          "exists": true,
+          "valid_json": false,
+          "drift_risk": "none"
+        }
+      ]
+    },
+    "cron_jobs": {
+      "score": 87,
+      "unhealthy": [
+        {
+          "name": "Daily Motivated Seller Pipeline",
+          "health_score": 5.0,
+          "error_rate": 1.0,
+          "prediction": "elevated failure risk, monitor closely",
+          "duration_trend": "insufficient_data"
+        },
+        {
+          "name": "Generate Parse.bot API Key",
+          "health_score": 5.0,
+          "error_rate": 1.0,
+          "prediction": "elevated failure risk, monitor closely",
+          "duration_trend": "insufficient_data"
+        },
+        {
+          "name": "Seller Financing Outreach Agent",
+          "health_score": 5.0,
+          "error_rate": 1.0,
+          "prediction": "elevated failure risk, monitor closely",
+          "duration_trend": "insufficient_data"
+        },
+        {
+          "name": "Twitter Auto-Post (Midday)",
+          "health_score": 5.5,
+          "error_rate": 0.4,
+          "prediction": "elevated failure risk, monitor closely",
+          "duration_trend": "increasing"
+        },
+        {
+          "name": "Enhanced Knowledge Graph Maintenance",
+          "health_score": 5.5,
+          "error_rate": 0.6,
+          "prediction": "likely to fail within 24h based on increasing error rate",
+          "duration_trend": "decreasing"
+        },
+        {
+          "name": "Dashboard Data Refresh",
+          "health_score": 5.5,
+          "error_rate": 0.9,
+          "prediction": "elevated failure risk, monitor closely \u2014 currently disabled",
+          "duration_trend": "decreasing"
+        },
+        {
+          "name": "Daily Tranchi Property Upload",
+          "health_score": 5.7,
+          "error_rate": 0.67,
+          "prediction": "elevated failure risk, monitor closely",
+          "duration_trend": "increasing"
+        },
+        {
+          "name": "Twitter Auto-Post (Morning)",
+          "health_score": 6.0,
+          "error_rate": 0.8,
+          "prediction": "elevated failure risk \u2014 currently disabled",
+          "duration_trend": "stable"
+        }
+      ]
+    },
+    "data_freshness": {
+      "score": 53,
+      "stale": [
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/memory/paper-trading-execution-log.jsonl",
+          "expected_hours": 24,
+          "actual_hours": 257.4,
+          "producer": "cron:paper-trading-monitor (legacy)"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/quant-research.log",
+          "expected_hours": 3,
+          "actual_hours": 53.5,
+          "producer": "cron:quant-research-agent"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/glint-monitor.log",
+          "expected_hours": 2,
+          "actual_hours": 249.1,
+          "producer": "cron:glint-market-monitor (python script)"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/kalshi-resolver.log",
+          "expected_hours": 2,
+          "actual_hours": 260.9,
+          "producer": "cron:kalshi-arbitrage-scanner (python script)"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/mirofish.log",
+          "expected_hours": 2,
+          "actual_hours": 249.6,
+          "producer": "cron:mirofish-simulation-engine (python script)"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/gov-tax-deed-scraper.log",
+          "expected_hours": 24,
+          "actual_hours": 263.0,
+          "producer": "cron:tax-deed-property-scanner"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/logs/knowledge-graph.log",
+          "expected_hours": 24,
+          "actual_hours": 342.2,
+          "producer": "cron:enhanced-knowledge-graph-maintenance"
+        },
+        {
+          "path": "/Users/marcmunoz/.openclaw/workspace/memory/observations.md",
+          "expected_hours": 3,
+          "actual_hours": 34.3,
+          "producer": "cron:total-recall-observer"
+        }
+      ]
+    },
+    "ontology_risk_score": 48
+  },
+  "predictions": [
+    {
+      "component": "pipeline:Motivated Seller Pipeline",
+      "prediction": "pipeline bottleneck: 100% failure rate",
+      "confidence": 0.95,
+      "evidence": [
+        "avg duration: 920s",
+        "failure rate: 100%",
+        "100% failure rate with avg 15min runtime. Pipeline completes but fails at result submission. Both runs exceeded 15 minut"
+      ],
+      "recommended_action": "Debug result submission step. Add timeout with graceful degradation. Consider splitting into sub-stages with independent success tracking.",
+      "severity": "critical"
+    },
+    {
+      "component": "cascade:model:openrouter_gemini_not_allowed",
+      "prediction": "cascade risk: Model misconfiguration set jobs to use openrouter/google/gemini-2.0-flash-001 wh",
+      "confidence": 0.9,
+      "evidence": [
+        "observed 597 times historically",
+        "affects 5 downstream components",
+        "Mass cascade affecting 3-4 hourly jobs simultaneously. Persisted for ~48 hours (Mar 6-7) with every "
+      ],
+      "recommended_action": "stagger jobs to avoid simultaneous trigger; monitor model:openrouter_gemini_not_allowed",
+      "severity": "critical"
+    },
+    {
+      "component": "pipeline:Daily Cash-Flowing Deals Email",
+      "prediction": "pipeline bottleneck: 80% failure rate",
+      "confidence": 0.9,
+      "evidence": [
+        "avg duration: 198s",
+        "failure rate: 80%",
+        "80% failure rate despite photo screening 643 properties. Failures in email delivery (webhook server issues). When it wor"
+      ],
+      "recommended_action": "Fix email delivery pipeline. Add retry for webhook failures. Separate property screening from email sending.",
+      "severity": "critical"
+    },
+    {
+      "component": "error:proxy_connection_blocked",
+      "prediction": "systemic error: 1622 occurrences, unfixed",
+      "confidence": 0.9,
+      "evidence": [
+        "1622 occurrences across glint-monitor, kalshi-resolver, mirofish",
+        "HTTP proxy (likely set via environment variables HTTP_PROXY/HTTPS_PROXY) blocks outbound HTTPS connections to external A"
+      ],
+      "recommended_action": "Jobs that strip proxy env vars (unset HTTP_PROXY) before running avoid this. Python scripts launched directly inherit proxy settings and fail. Fix: ad",
+      "severity": "high"
+    },
+    {
+      "component": "error:model_deprecation",
+      "prediction": "systemic error: 746 occurrences, unfixed",
+      "confidence": 0.9,
+      "evidence": [
+        "746 occurrences across cron-scheduler",
+        "Deprecated model ID 'claude-haiku-4-5-20251001' is still configured in 20+ job payloads. The gateway rejects it and fall"
+      ],
+      "recommended_action": "Update all job payloads in jobs.json to use an allowed model ID. This generates hundreds of log lines per day and obscures real errors in gateway.err.",
+      "severity": "high"
+    },
+    {
+      "component": "error:uncategorized_script_failures",
+      "prediction": "systemic error: 651 occurrences, unfixed",
+      "confidence": 0.9,
+      "evidence": [
+        "651 occurrences across glint-monitor, gov-tax-deed-scraper, observer",
+        "Multiple python scripts and shell scripts failing with non-zero exit codes. Common causes include missing dependencies, "
+      ],
+      "recommended_action": "Add structured error logging to all scripts so failures can be categorized. Currently many just log generic 'failed (exit 1)' without details.",
+      "severity": "high"
+    },
+    {
+      "component": "error:auth_permission_error",
+      "prediction": "systemic error: 227 occurrences, unfixed",
+      "confidence": 0.9,
+      "evidence": [
+        "227 occurrences across glint-monitor, quant-research, reflector",
+        "External APIs returning authentication or permission errors. Likely caused by expired API keys, rate limiting, or IP-bas"
+      ],
+      "recommended_action": "Audit all API keys for expiration. Implement key rotation and rate limit backoff logic.",
+      "severity": "high"
+    },
+    {
+      "component": "pipeline:Daily Tranchi Pipeline",
+      "prediction": "pipeline bottleneck: 67% failure rate",
+      "confidence": 0.83,
+      "evidence": [
+        "avg duration: 206s",
+        "failure rate: 67%",
+        "High failure rate (67%) uploading 81 properties. Failures likely from API timeouts or data validation issues."
+      ],
+      "recommended_action": "Add retry logic with exponential backoff. Validate property data before upload attempt.",
+      "severity": "high"
+    },
+    {
+      "component": "contention:15:00 ET (daily)",
+      "prediction": "resource collision window: 3 jobs compete",
+      "confidence": 0.8,
+      "evidence": [
+        "time window: 15:00 ET (daily)",
+        "resources: LLM tokens, BatchData API, Parse.bot API, ActiveCampaign API",
+        "3 heavy lead-generation jobs fire at exactly 15:00 ET. All require LLM orchestration, external API calls (BatchData skip"
+      ],
+      "recommended_action": " 4-session concurrency limit when combined with hourly jobs.",
+      "severity": "high"
+    },
+    {
+      "component": "correlation:service:mission-control <-> service:mission-control",
+      "prediction": "correlated cascade risk (self_cascading)",
+      "confidence": 0.8,
+      "evidence": [
+        "correlation: 1.0",
+        "type: self_cascading",
+        "Mission control crash-restarts cause port 3000 binding failures which cause more crashes. The Errno 48 loop is self-rein"
+      ],
+      "recommended_action": "7672 'Address already in use' errors indicate thousands of rapid restart cycles.",
+      "severity": "high"
+    },
+    {
+      "component": "pipeline:Daily DSCR Lead Generation",
+      "prediction": "pipeline bottleneck: 60% failure rate",
+      "confidence": 0.8,
+      "evidence": [
+        "avg duration: 3837s",
+        "failure rate: 60%",
+        "Extremely long runtimes (avg 64min, max 118min) with 60% failure rate. Observed hanging at offset 35000 during batch pro"
+      ],
+      "recommended_action": "Implement parallel batch processing, add checkpoint/resume for interrupted runs, reduce batch size or add early termination on timeout. Consider pre-filtering leads before expensive processing.",
+      "severity": "high"
+    },
+    {
+      "component": "pipeline:MiroFish Real-Time Pipeline",
+      "prediction": "pipeline bottleneck: 60% failure rate",
+      "confidence": 0.8,
+      "evidence": [
+        "avg duration: 150s",
+        "failure rate: 60%",
+        "High failure rate (60%) with variable duration (2.5min avg, 6.5min max). Pipeline status analysis takes too long when da"
+      ],
+      "recommended_action": "Add fast-fail on degraded dependencies. Cache previous pipeline status for comparison.",
+      "severity": "high"
+    },
+    {
+      "component": "cron:Twitter Auto-Post (Midday)",
+      "prediction": "failure risk: error rate increasing",
+      "confidence": 0.73,
+      "evidence": [
+        "error rate: 0.4",
+        "error trend: increasing",
+        "health score: 5.5/10"
+      ],
+      "recommended_action": "investigate root cause of increasing errors",
+      "severity": "high"
+    },
+    {
+      "component": "cron:Enhanced Knowledge Graph Maintenance",
+      "prediction": "failure risk: error rate increasing",
+      "confidence": 0.73,
+      "evidence": [
+        "error rate: 0.6",
+        "error trend: increasing",
+        "health score: 5.5/10"
+      ],
+      "recommended_action": "investigate root cause of increasing errors",
+      "severity": "high"
+    },
+    {
+      "component": "correlation:service:task-executor <-> config:auth-profiles",
+      "prediction": "correlated cascade risk (causal)",
+      "confidence": 0.72,
+      "evidence": [
+        "correlation: 0.9",
+        "type: causal",
+        "Task executor failures are directly caused by 'runtime.modelAuth is unavailable; using legacy auth-profiles'. When auth "
+      ],
+      "recommended_action": "ntly after 3 retries. All permanent task failures trace back to this auth issue.",
+      "severity": "medium"
+    },
+    {
+      "component": "config:openclaw.json",
+      "prediction": "config drift risk (high)",
+      "confidence": 0.7,
+      "evidence": [
+        "Significant drift over 6 backup generations. Major additions: session management, lossless-claw plugin, Telegram retry config, agent context pruning. ",
+        "backup count: 6"
+      ],
+      "recommended_action": "validate config, create backup, review recent changes",
+      "severity": "high"
+    },
+    {
+      "component": "cron:Escalation Alerter",
+      "prediction": "failure risk: error rate increasing",
+      "confidence": 0.69,
+      "evidence": [
+        "error rate: 0.1",
+        "error trend: increasing",
+        "health score: 7.0/10"
+      ],
+      "recommended_action": "investigate root cause of increasing errors",
+      "severity": "medium"
+    },
+    {
+      "component": "correlation:cron:tranchi-upload <-> cron:motivated-seller-pipeline",
+      "prediction": "correlated cascade risk (data_dependency)",
+      "confidence": 0.68,
+      "evidence": [
+        "correlation: 0.85",
+        "type: data_dependency",
+        "Tranchi upload depends on motivated seller pipeline producing data. Both have 2 consecutive errors simultaneously. When "
+      ],
+      "recommended_action": "errors. They share the same data path through government-seized-scraper outputs.",
+      "severity": "high"
+    },
+    {
+      "component": "cron:Twitter Auto-Post (Midday)",
+      "prediction": "timeout risk: duration trending up",
+      "confidence": 0.64,
+      "evidence": [
+        "avg duration: 74.9s",
+        "duration trend: increasing",
+        "health score: 5.5/10"
+      ],
+      "recommended_action": "investigate increasing duration; add timeout or optimize",
+      "severity": "medium"
+    },
+    {
+      "component": "correlation:cron:seller-financing-outreach <-> cron:motivated-seller-pipeline",
+      "prediction": "correlated cascade risk (data_dependency)",
+      "confidence": 0.64,
+      "evidence": [
+        "correlation: 0.8",
+        "type: data_dependency",
+        "Seller financing agent loads leads from probate_or_tax_output.csv and lis_pendens_output.csv, both produced by the motiv"
+      ],
+      "recommended_action": "inds 0 qualifying leads from 816 scored, suggesting upstream data quality issue.",
+      "severity": "high"
+    },
+    {
+      "component": "cron:Daily Tranchi Property Upload",
+      "prediction": "timeout risk: duration trending up",
+      "confidence": 0.63,
+      "evidence": [
+        "avg duration: 206.3s",
+        "duration trend: increasing",
+        "health score: 5.7/10"
+      ],
+      "recommended_action": "investigate increasing duration; add timeout or optimize",
+      "severity": "medium"
+    },
+    {
+      "component": "contention:15:00 ET + hourly ov",
+      "prediction": "resource collision window: 4 jobs compete",
+      "confidence": 0.6,
+      "evidence": [
+        "time window: 15:00 ET + hourly overlap",
+        "resources: LLM tokens, Kalshi API, Polymarket API",
+        "4 hourly/30-min trading jobs overlap with the 15:00 lead-gen burst. Combined with the 3 lead-gen jobs, this creates a 7-"
+      ],
+      "recommended_action": "y cause of the rate_limit cascades observed in failure data.",
+      "severity": "medium"
+    },
+    {
+      "component": "contention:Every 1h (continuous",
+      "prediction": "resource collision window: 4 jobs compete",
+      "confidence": 0.6,
+      "evidence": [
+        "time window: Every 1h (continuous)",
+        "resources: LLM tokens, prediction market APIs",
+        "4 hourly jobs all using LLM tokens. Combined with the 30-min Situation Monitor, this means 5 trading-related jobs compet"
+      ],
+      "recommended_action": "lign (same anchor), all 4 fire within seconds of each other.",
+      "severity": "medium"
+    },
+    {
+      "component": "cascade:anthropic:rate_limit_cooldown",
+      "prediction": "cascade risk: Anthropic API rate limit triggers provider cooldown, causing all concurrent jobs",
+      "confidence": 0.57,
+      "evidence": [
+        "observed 54 times historically",
+        "affects 8 downstream components",
+        "When multiple hourly jobs fire simultaneously and exhaust the Anthropic API quota, ALL jobs in the s"
+      ],
+      "recommended_action": "stagger jobs to avoid simultaneous trigger; monitor anthropic:rate_limit_cooldown",
+      "severity": "critical"
+    },
+    {
+      "component": "cron:DSCR Multi-Touch Outreach Sequence",
+      "prediction": "timeout risk: duration trending up",
+      "confidence": 0.53,
+      "evidence": [
+        "avg duration: 297.1s",
+        "duration trend: increasing",
+        "health score: 9.0/10"
+      ],
+      "recommended_action": "investigate increasing duration; add timeout or optimize",
+      "severity": "medium"
+    },
+    {
+      "component": "config:jobs.json",
+      "prediction": "config drift risk (medium)",
+      "confidence": 0.5,
+      "evidence": [
+        "32 total jobs defined. 17 currently enabled, 15 disabled. No backup rotation means a corruption event would require manual reconstruction. The file is",
+        "backup count: 1"
+      ],
+      "recommended_action": "validate config, create backup, review recent changes",
+      "severity": "medium"
+    },
+    {
+      "component": "config:outcome_config.json",
+      "prediction": "config drift risk (medium)",
+      "confidence": 0.5,
+      "evidence": [
+        "This file is programmatically updated by outcome_analyzer.py weekly. All signal_weights and source_weights are at 1.0 (default), suggesting the outcom",
+        "backup count: 0"
+      ],
+      "recommended_action": "validate config, create backup, review recent changes",
+      "severity": "medium"
+    },
+    {
+      "component": "cascade:delivery:telegram_delivery_failure",
+      "prediction": "cascade risk: Telegram delivery failures on announcement-mode jobs cause repeated retry failur",
+      "confidence": 0.42,
+      "evidence": [
+        "observed 25 times historically",
+        "affects 5 downstream components",
+        "Telegram delivery failures cause 'cron announce delivery failed' errors. These often cluster when th"
+      ],
+      "recommended_action": "stagger jobs to avoid simultaneous trigger; monitor delivery:telegram_delivery_failure",
+      "severity": "medium"
+    }
+  ],
+  "prediction_count": 28,
+  "active_risks": [
+    {
+      "component": "service:mission-control",
+      "risk_score": 80,
+      "trend": "chronic",
+      "predicted_failure": "Next gateway restart will trigger mission-control port conflict; needs SO_REUSEADDR or process management fix",
+      "factors": [
+        "37672 'Address already in use' errors in mission-control.log (301k lines total)",
+        "Repeated OSError: [Errno 48] crash-restart loop on port 3000",
+        "No graceful port release \u2014 relies on process death to free socket"
+      ]
+    },
+    {
+      "component": "cron:tranchi-upload",
+      "risk_score": 70,
+      "trend": "worsening",
+      "predicted_failure": "Active consecutive failures \u2014 property data not reaching Tranchi; needs immediate fix",
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job 26fc3ddd \u2014 lastStatus=error",
+        "Daily property upload to Tranchi platform is blocked"
+      ]
+    },
+    {
+      "component": "cron:motivated-seller-pipeline",
+      "risk_score": 70,
+      "trend": "worsening",
+      "predicted_failure": "Active failures blocking motivated seller lead flow",
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job a3f7c219 \u2014 lastStatus=error",
+        "Pipeline starts but appears to stall during probate scraping"
+      ]
+    },
+    {
+      "component": "system:ram",
+      "risk_score": 70,
+      "trend": "worsening",
+      "predicted_failure": "System approaching OOM; Chrome browser process is primary culprit. May cause service crashes under load.",
+      "factors": [
+        "Only 112 MB free RAM (threshold 500 MB)",
+        "Chrome renderer consuming 1 GB+ RAM",
+        "agent-memory-server at 386 MB"
+      ]
+    },
+    {
+      "component": "cron:seller-financing-outreach",
+      "risk_score": 65,
+      "trend": "worsening",
+      "predicted_failure": "Broken in two ways: execution errors AND zero-output when running. Scoring logic needs review.",
+      "factors": [
+        "2 consecutive errors currently (consecErrors=2)",
+        "Job 5bcad111 \u2014 lastStatus=error",
+        "Even when running successfully, finds 0 HOT and 0 WARM leads consistently"
+      ]
+    },
+    {
+      "component": "cron:tax-deed-scanner",
+      "risk_score": 60,
+      "trend": "worsening",
+      "predicted_failure": "Non-functional; all recent runs have failed",
+      "factors": [
+        "5 errors vs 0 successes in 7 days (100% failure rate)",
+        "Job 2a210f51 \u2014 consistently failing",
+        "Recently enabled but not producing results"
+      ]
+    },
+    {
+      "component": "cron:pattern-detection-scanner",
+      "risk_score": 55,
+      "trend": "worsening",
+      "predicted_failure": "Effectively non-functional; needs investigation or should be disabled",
+      "factors": [
+        "59 errors vs 0 successes in 7 days (100% recent failure rate)",
+        "Job e7b7c843 \u2014 enabled but consistently failing",
+        "Zero successful runs detected in analyzed period"
+      ]
+    },
+    {
+      "component": "cron:evening-revenue-report",
+      "risk_score": 52,
+      "trend": "degraded",
+      "predicted_failure": "Most evening reports fail to send due to gateway timeouts",
+      "factors": [
+        "4 errors vs 1 success in 7 days (80% failure rate)",
+        "Job 00196062 \u2014 gateway timeouts after 30000ms",
+        "Report delivery intermittent"
+      ]
+    },
+    {
+      "component": "service:agent-memory-server",
+      "risk_score": 50,
+      "trend": "stable but degraded",
+      "predicted_failure": "Functional now but port conflicts on restart; deprecation warnings signal future breakage on FastAPI upgrade",
+      "factors": [
+        "12469 ERROR entries in 262k-line log (4.7% error rate)",
+        "Errno 48 port 8100 binding conflicts on restart",
+        "DeprecationWarning: on_event is deprecated \u2014 future FastAPI upgrade will break"
+      ]
+    },
+    {
+      "component": "cron:nexus-coordinator",
+      "risk_score": 50,
+      "trend": "volatile",
+      "predicted_failure": "High error rate but self-correcting; trading halt is safety feature working correctly",
+      "factors": [
+        "113 errors vs 116 successes in 7 days (49% failure rate)",
+        "Job ID 78961fb4 \u2014 highest run volume with near-50% error rate",
+        "Runs every 30min \u2014 errors are intermittent timeout/resource issues"
+      ]
+    }
+  ],
+  "enhancement_queue": [
+    {
+      "category": "log_rotation",
+      "component": "logs:mission-control.log",
+      "recommendation": "Rotate at 5 MB. Also fix the root cause: add SO_REUSEADDR to the TCPServer or use a process manager that waits for port release before restart.",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "zero_output",
+      "component": "cron:seller-financing-outreach",
+      "recommendation": "Review scoring thresholds in seller_distress.py. Either lower the qualifying bar (min_score=60 may be too high) or enrich lead data with additional di",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "performance",
+      "component": "cron:nexus-coordinator",
+      "recommendation": "Add a lightweight pre-check before spawning full agent session. If no alerts/actions needed, skip the expensive LLM call. Or reduce frequency to hourl",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "performance",
+      "component": "config:model-fallback-noise",
+      "recommendation": "Update all job payload.model fields from 'claude-haiku-4-5-20251001' to the allowed model in agents.defaults.model.primary, or add haiku to allowed mo",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "redundancy",
+      "component": "cron:dscr-lead-generation + cron:dscr-lead-pipeline",
+      "recommendation": "Consolidate into one job or stagger them. Running both at 3PM doubles API costs and creates race conditions in ActiveCampaign uploads.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "security",
+      "component": "config:openclaw.json",
+      "recommendation": "Move API keys to environment variables or a secrets manager. Remove from cron job payload text where they are visible in logs and run history.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "resource_waste",
+      "component": "service:chrome-browser",
+      "recommendation": "Evaluate if browser automation is still needed. If only used occasionally, launch on-demand rather than keeping persistent. Could reclaim 1 GB RAM.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "wasted_compute",
+      "component": "cron:pattern-detection-scanner",
+      "recommendation": "Disable until root cause is fixed. Currently burning API credits every run cycle for zero value.",
+      "priority": "high",
+      "effort": "low"
+    },
+    {
+      "category": "observability",
+      "component": "system:cron-error-alerting",
+      "recommendation": "Re-enable Escalation Alerter or build lightweight consecutive-error detection into the gateway. Alert on consecErrors >= 2.",
+      "priority": "high",
+      "effort": "medium"
+    },
+    {
+      "category": "config_hygiene",
+      "component": "workspace:workspace-dir-name",
+      "recommendation": "Rename workspace directory to remove the API key from the path. Update all references in openclaw.json.",
+      "priority": "high",
+      "effort": "medium"
+    }
+  ],
+  "_meta": {
+    "generated_by": "daily_prediction.py",
+    "compile_ok": true,
+    "compile_elapsed_s": 0.0,
+    "predict_elapsed_s": 0.0,
+    "total_elapsed_s": 0.1
+  }
+}

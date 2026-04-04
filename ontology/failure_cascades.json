@@ -1,0 +1,148 @@
+{
+  "analysis_timestamp": "2026-04-01T00:00:00Z",
+  "total_failure_records_analyzed": 1390,
+  "total_cascade_groups": 236,
+  "simultaneous_failure_events_3_plus": 37,
+  "cascades": [
+    {
+      "trigger": "anthropic:rate_limit_cooldown",
+      "description": "Anthropic API rate limit triggers provider cooldown, causing all concurrent jobs to fail simultaneously",
+      "downstream_failures": [
+        "cron:situation-monitor",
+        "cron:glint-market-monitor",
+        "cron:paper-trading-monitor",
+        "cron:kalshi-arbitrage-scanner",
+        "cron:polymarket-scanner",
+        "cron:whale-tracker-refresh",
+        "cron:critical-job-health-monitor",
+        "cron:total-recall-observer"
+      ],
+      "time_to_cascade_minutes": 0,
+      "frequency": 54,
+      "severity": "critical",
+      "example_timestamps": [
+        "2026-02-26T15:29:39Z",
+        "2026-02-28T12:07:23Z",
+        "2026-03-02T15:26:48Z",
+        "2026-03-11T04:12:09Z",
+        "2026-03-11T12:12:23Z"
+      ],
+      "pattern": "When multiple hourly jobs fire simultaneously and exhaust the Anthropic API quota, ALL jobs in the same window fail with 'Provider anthropic is in cooldown'. Up to 5 jobs fail at the exact same millisecond timestamp.",
+      "affected_job_ids": [
+        "03ca9343-8b5c (Situation Monitor)",
+        "5197ca32-49df (Glint Market Monitor)",
+        "49e0e7d4-f037 (Paper Trading Monitor)",
+        "7fa5f3c3-21e6 (Kalshi Arbitrage Scanner)",
+        "96e23af1-8b76 (whale-tracker-refresh)",
+        "01c296e1-cdab (Critical Job Health Monitor)",
+        "e3ec5538-450e (Total Recall Observer)"
+      ]
+    },
+    {
+      "trigger": "model:openrouter_gemini_not_allowed",
+      "description": "Model misconfiguration set jobs to use openrouter/google/gemini-2.0-flash-001 which was not in the allowed model list",
+      "downstream_failures": [
+        "cron:situation-monitor",
+        "cron:glint-market-monitor",
+        "cron:paper-trading-monitor",
+        "cron:kalshi-arbitrage-scanner",
+        "cron:evening-revenue-report"
+      ],
+      "time_to_cascade_minutes": 0,
+      "frequency": 597,
+      "severity": "critical",
+      "example_timestamps": [
+        "2026-03-06T00:00:33Z",
+        "2026-03-06T01:00:33Z",
+        "2026-03-06T02:00:33Z",
+        "2026-03-07T03:06:43Z",
+        "2026-03-07T07:06:44Z"
+      ],
+      "pattern": "Mass cascade affecting 3-4 hourly jobs simultaneously. Persisted for ~48 hours (Mar 6-7) with every hourly cycle failing across all affected jobs. 597 total failure records from this single misconfiguration.",
+      "affected_job_ids": [
+        "03ca9343-8b5c (Situation Monitor)",
+        "5197ca32-49df (Glint Market Monitor)",
+        "49e0e7d4-f037 (Paper Trading Monitor)",
+        "7fa5f3c3-21e6 (Kalshi Arbitrage Scanner)",
+        "00196062-fb2d (Evening Revenue Report)"
+      ]
+    },
+    {
+      "trigger": "auth:api_key_missing",
+      "description": "Anthropic API key missing from auth store caused cascading auth failures across all jobs",
+      "downstream_failures": [
+        "cron:glint-market-monitor",
+        "cron:kalshi-arbitrage-scanner",
+        "cron:paper-trading-monitor",
+        "cron:polymarket-opportunity-scanner",
+        "cron:situation-monitor"
+      ],
+      "time_to_cascade_minutes": 5,
+      "frequency": 8,
+      "severity": "critical",
+      "example_timestamps": [
+        "2026-01-22T05:17:14Z",
+        "2026-01-22T05:17:44Z",
+        "2026-01-22T05:17:57Z",
+        "2026-01-22T05:19:46Z"
+      ],
+      "pattern": "API key eviction from auth store triggers sequential failures as each job attempts to authenticate. First failure triggers within seconds, full cascade within 5 minutes."
+    },
+    {
+      "trigger": "resource:concurrent_job_timeout_storm",
+      "description": "Multiple heavy jobs running simultaneously cause execution timeouts that cascade through the job queue",
+      "downstream_failures": [
+        "cron:dashboard-data-refresh",
+        "cron:situation-monitor",
+        "cron:glint-market-monitor",
+        "cron:paper-trading-monitor",
+        "cron:kalshi-arbitrage-scanner",
+        "cron:memory-maintenance"
+      ],
+      "time_to_cascade_minutes": 30,
+      "frequency": 11,
+      "severity": "high",
+      "example_timestamps": [
+        "2026-01-21T21:22:50Z",
+        "2026-01-22T16:09:46Z",
+        "2026-01-23T11:31:06Z",
+        "2026-03-24T20:32:00Z",
+        "2026-03-30T08:09:15Z"
+      ],
+      "pattern": "When 3+ resource-heavy jobs (LLM-backed) overlap, execution timeouts propagate. Dashboard Data Refresh was the most frequent timeout victim (14 consecutive timeout failures early on). Timeout storms typically affect 2-4 jobs in a 30-minute window."
+    },
+    {
+      "trigger": "delivery:telegram_delivery_failure",
+      "description": "Telegram delivery failures on announcement-mode jobs cause repeated retry failures",
+      "downstream_failures": [
+        "cron:dscr-lead-gen",
+        "cron:dscr-outreach",
+        "cron:polymarket-opportunity-scanner",
+        "cron:daily-dashboard-refresh",
+        "cron:daily-cash-flowing-deals"
+      ],
+      "time_to_cascade_minutes": 60,
+      "frequency": 25,
+      "severity": "medium",
+      "example_timestamps": [
+        "2026-01-22T02:17:41Z",
+        "2026-01-22T15:51:22Z",
+        "2026-01-23T14:44:44Z",
+        "2026-02-05T18:12:24Z"
+      ],
+      "pattern": "Telegram delivery failures cause 'cron announce delivery failed' errors. These often cluster when the Telegram channel config changes (whatsapp/telegram toggling). Does not affect job execution but prevents result delivery."
+    }
+  ],
+  "meta": {
+    "date_range_analyzed": "2026-01-21 to 2026-03-31",
+    "total_run_files_scanned": 50,
+    "error_type_breakdown": {
+      "model_not_allowed": 597,
+      "rate_limit_cooldown": 54,
+      "timeout": 11,
+      "delivery_failed": 25,
+      "auth_key_missing": 8,
+      "other": 695
+    }
+  }
+}

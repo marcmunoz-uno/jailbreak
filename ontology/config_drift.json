@@ -1,0 +1,138 @@
+{
+  "analysis_timestamp": "2026-04-04T05:39:52.518377+00:00",
+  "configs": [
+    {
+      "path": "/Users/marcmunoz/.openclaw/openclaw.json",
+      "backup_count": 6,
+      "backup_files": [
+        "openclaw.json.bak",
+        "openclaw.json.bak.1",
+        "openclaw.json.bak.2",
+        "openclaw.json.bak.3",
+        "openclaw.json.bak.4",
+        "openclaw.json.bak.5"
+      ],
+      "drift_detected": true,
+      "drift_details": {
+        "current_vs_bak": {
+          "changes": "lastTouchedAt changed from string '2026-03-19T04:36:28.543Z' to epoch 1775252896180; meta.lastTouchedAt format changed from ISO string to epoch ms",
+          "risk": "low"
+        },
+        "bak_vs_bak1": {
+          "changes": "meta.lastTouchedAt: '2026-03-19T04:36:28.543Z' -> '2026-03-18T22:42:55.017Z'",
+          "risk": "low"
+        },
+        "bak1_vs_bak2_vs_bak3": {
+          "changes": "Minimal drift between .bak.1, .bak.2, .bak.3 \u2014 only meta.lastTouchedAt differs",
+          "risk": "low"
+        },
+        "major_drift_bak_to_current": {
+          "keys_added": [
+            "agents.defaults.models (model-specific params with cacheRetention)",
+            "agents.defaults.contextPruning (mode: cache-ttl, ttl: 1h)",
+            "agents.defaults.heartbeat (every: 30m)",
+            "agents.list[0].memorySearch.sources (empty array)",
+            "channels.telegram.timeoutSeconds (30)",
+            "channels.telegram.retry (attempts: 5, minDelayMs: 200, maxDelayMs: 15000, jitter: 0.15)",
+            "plugins.installs.lossless-claw (npm plugin install metadata)",
+            "plugins.allow (array: ['acpx', 'lossless-claw', 'telegram'])",
+            "session (maintenance and reset config blocks)"
+          ],
+          "keys_removed": [],
+          "values_changed": [
+            "channels.whatsapp.enabled: true -> false",
+            "plugins.entries.whatsapp.enabled: true -> false",
+            "plugins.entries.lossless-claw added (enabled: true)"
+          ],
+          "risk": "medium",
+          "notes": "WhatsApp was disabled, Telegram got retry/timeout config, lossless-claw plugin installed, session maintenance/reset added, agent model config expanded with cacheRetention and contextPruning"
+        },
+        "major_drift_bak4_to_bak3": {
+          "keys_added": [],
+          "keys_removed": [],
+          "values_changed": [
+            "hooks.internal.entries.bootstrap-extra-files.enabled: true -> false (in bak.3)",
+            "hooks.internal.entries.session-memory.enabled: true -> false (in bak.3)"
+          ],
+          "risk": "medium",
+          "notes": "Bootstrap-extra-files and session-memory internal hooks were disabled between bak.4 and bak.3"
+        },
+        "major_drift_bak5_to_bak4": {
+          "values_changed": [
+            "hooks.internal.entries.boot-md.enabled: true -> false",
+            "hooks.internal.entries.session-memory.enabled: true -> true (no change)"
+          ],
+          "risk": "low",
+          "notes": "boot-md internal hook disabled between bak.5 and bak.4"
+        }
+      },
+      "overall_risk": "high",
+      "summary": "Significant drift over 6 backup generations. Major additions: session management, lossless-claw plugin, Telegram retry config, agent context pruning. Major changes: WhatsApp disabled, 3 internal hooks progressively disabled (boot-md -> session-memory -> bootstrap-extra-files). The meta.lastTouchedAt field changed format from ISO string to epoch milliseconds.",
+      "_hash": "538c9312e495"
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/cron/jobs.json",
+      "backup_count": 1,
+      "drift_detected": true,
+      "drift_details": "No backup files exist. jobs.json is modified frequently by the scheduler (updatedAtMs changes on every run). No version history available for drift comparison.",
+      "risk": "medium",
+      "notes": "32 total jobs defined. 17 currently enabled, 15 disabled. No backup rotation means a corruption event would require manual reconstruction. The file is 1500+ lines and contains critical scheduling logic. [compiler: modified 0.2h ago]",
+      "_hash": "093c197bc993"
+    },
+    {
+      "path": "/Users/marcmunoz/.mcp.json",
+      "backup_count": 0,
+      "drift_detected": false,
+      "drift_details": "No backup files exist. Contains 6 MCP server definitions: agent-memory, task-dispatcher, godmode, hermes, conway, parse. All appear stable.",
+      "risk": "low",
+      "notes": "Static configuration, rarely modified. No backup rotation needed unless MCP servers are reconfigured.",
+      "_hash": "bd7c5b386537"
+    },
+    {
+      "path": "/Users/marcmunoz/n8n-workflows/outcome_config.json",
+      "backup_count": 0,
+      "drift_detected": false,
+      "drift_details": "No backup files exist. Contains trading signal weights and DSCR market priorities. last_analysis timestamp indicates active updates by the Weekly Outcome Analysis cron job.",
+      "risk": "medium",
+      "notes": "This file is programmatically updated by outcome_analyzer.py weekly. All signal_weights and source_weights are at 1.0 (default), suggesting the outcome analyzer may not be making meaningful adjustments, or weights were recently reset. blacklisted_tickers and blacklisted_markets are empty arrays. No backup means a bad analysis run could corrupt signal weights with no rollback.",
+      "_hash": "8990cba71dfb"
+    }
+  ],
+  "evolution_timeline": [
+    {
+      "version": "bak.5 (oldest, ~2026-03-13)",
+      "state": "All internal hooks enabled (bootstrap-extra-files, session-memory, command-logger, boot-md). WhatsApp enabled. No plugins beyond whatsapp/telegram/acpx. No session management."
+    },
+    {
+      "version": "bak.4 (~2026-03-18T22:22Z)",
+      "state": "boot-md disabled. Otherwise same as bak.5."
+    },
+    {
+      "version": "bak.3 (~2026-03-18T22:30Z)",
+      "state": "bootstrap-extra-files disabled, session-memory disabled. Progressive hook disabling."
+    },
+    {
+      "version": "bak.2 (~2026-03-18T22:42Z)",
+      "state": "Same as bak.3. Minor timestamp update only."
+    },
+    {
+      "version": "bak.1 (~2026-03-19T04:36Z)",
+      "state": "Same as bak.2. agents.list[0] gained memorySearch.sources. WhatsApp still enabled."
+    },
+    {
+      "version": "bak (~2026-03-19, epoch 1775104412185)",
+      "state": "Same as bak.1 with timestamp update."
+    },
+    {
+      "version": "current (~2026-03-31, epoch 1775252896180)",
+      "state": "Major additions: session management, lossless-claw plugin, Telegram retry/timeout config, agent context pruning/heartbeat/cacheRetention. WhatsApp disabled. meta.lastTouchedAt format changed to epoch."
+    }
+  ],
+  "recommendations": [
+    "Add backup rotation for jobs.json \u2014 it has no backups and contains 32 job definitions",
+    "Add backup rotation for outcome_config.json \u2014 programmatic weekly updates with no rollback",
+    "Monitor the progressive hook disabling trend \u2014 3 of 4 internal hooks now disabled",
+    "Investigate why all outcome_config signal weights remain at 1.0 default despite weekly analysis",
+    "Consider pinning meta.lastTouchedAt format to either ISO string or epoch, not both"
+  ]
+}

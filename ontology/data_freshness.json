@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-04-04T05:39:52.518377+00:00",
+  "analysis_note": "Age calculated relative to 2026-04-04 05:39 UTC by compiler.py",
+  "data_sources": [
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/lead_pipeline/daily_leads/2026-04-03.csv",
+      "expected_freshness_hours": 24,
+      "actual_age_hours": 4.6,
+      "status": "fresh",
+      "producer": "cron:daily-lead-csv-propstream",
+      "consumers": [
+        "cron:dscr-lead-gen",
+        "cron:dscr-outreach",
+        "cron:skip-trace"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/memecoin_strategy/scan_results.json",
+      "expected_freshness_hours": 4,
+      "actual_age_hours": 2.7,
+      "status": "fresh",
+      "producer": "cron:memecoin-scanner",
+      "consumers": [
+        "cron:paper-trading-monitor",
+        "manual:review"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/memecoin_strategy/paper_trades.json",
+      "expected_freshness_hours": 4,
+      "actual_age_hours": 2.7,
+      "status": "fresh",
+      "producer": "cron:memecoin-scanner",
+      "consumers": [
+        "cron:daily-dashboard-refresh",
+        "cron:evening-report"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/memory/cron-ledger.jsonl",
+      "expected_freshness_hours": 1,
+      "actual_age_hours": 0.3,
+      "status": "fresh",
+      "producer": "all-cron-jobs",
+      "consumers": [
+        "cron:morning-briefing",
+        "cron:evening-report",
+        "cron:memory-maintenance"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/memory/paper-trading-execution-log.jsonl",
+      "expected_freshness_hours": 24,
+      "actual_age_hours": 257.4,
+      "status": "stale",
+      "producer": "cron:paper-trading-monitor (legacy)",
+      "consumers": [
+        "cron:evening-report"
+      ],
+      "note": "Superseded by unified_portfolio.json and unified_scorecard.json in mission-control. Last updated 10+ days ago."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/trade-engine.log",
+      "expected_freshness_hours": 2,
+      "actual_age_hours": 0.9,
+      "status": "fresh",
+      "producer": "cron:paper-trading-monitor",
+      "consumers": [
+        "cron:trading-system-watchdog",
+        "manual:debugging"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/observer.log",
+      "expected_freshness_hours": 3,
+      "actual_age_hours": 1.3,
+      "status": "fresh",
+      "producer": "cron:total-recall-observer",
+      "consumers": [
+        "cron:total-recall-reflector"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/reflector.log",
+      "expected_freshness_hours": 3,
+      "actual_age_hours": 1.2,
+      "status": "fresh",
+      "producer": "cron:total-recall-reflector",
+      "consumers": [
+        "manual:debugging"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/quant-research.log",
+      "expected_freshness_hours": 3,
+      "actual_age_hours": 53.5,
+      "status": "stale",
+      "producer": "cron:quant-research-agent",
+      "consumers": [
+        "manual:debugging"
+      ],
+      "note": "Quant research runs every 2h but log file not updated for 53h. Agent may be writing to a different location."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/glint-monitor.log",
+      "expected_freshness_hours": 2,
+      "actual_age_hours": 249.1,
+      "status": "stale",
+      "producer": "cron:glint-market-monitor (python script)",
+      "consumers": [
+        "manual:debugging"
+      ],
+      "note": "Python-level log stale for 10+ days. Glint monitor cron job runs fine via agent \u2014 this log is from the legacy python script path."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/kalshi-resolver.log",
+      "expected_freshness_hours": 2,
+      "actual_age_hours": 260.9,
+      "status": "stale",
+      "producer": "cron:kalshi-arbitrage-scanner (python script)",
+      "consumers": [
+        "manual:debugging"
+      ],
+      "note": "Legacy python log stale 10+ days. Kalshi scanner cron job runs healthy via agent."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/mirofish.log",
+      "expected_freshness_hours": 2,
+      "actual_age_hours": 249.6,
+      "status": "stale",
+      "producer": "cron:mirofish-simulation-engine (python script)",
+      "consumers": [
+        "manual:debugging"
+      ],
+      "note": "Legacy python log stale. MiroFish cron job runs healthy via agent."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/gov-tax-deed-scraper.log",
+      "expected_freshness_hours": 24,
+      "actual_age_hours": 263.0,
+      "status": "stale",
+      "producer": "cron:tax-deed-property-scanner",
+      "consumers": [
+        "manual:review"
+      ],
+      "note": "Tax deed scraper log not updated for 11+ days."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/logs/knowledge-graph.log",
+      "expected_freshness_hours": 24,
+      "actual_age_hours": 342.2,
+      "status": "stale",
+      "producer": "cron:enhanced-knowledge-graph-maintenance",
+      "consumers": [
+        "manual:debugging"
+      ],
+      "note": "Knowledge graph log dormant for 14+ days. The Knowledge Graph Maintenance job has 60% error rate."
+    },
+    {
+      "path": "/Users/marcmunoz/.openclaw/workspace/memory/observations.md",
+      "expected_freshness_hours": 3,
+      "actual_age_hours": 34.3,
+      "status": "stale",
+      "producer": "cron:total-recall-observer",
+      "consumers": [
+        "cron:total-recall-reflector",
+        "cron:memory-maintenance"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/fabric/ (latest: openclaw-task-2026-04-04T0347Z-574b.md)",
+      "expected_freshness_hours": 6,
+      "actual_age_hours": 0.2,
+      "status": "fresh",
+      "producer": "openclaw-task-system",
+      "consumers": [
+        "cron:nexus-coordinator",
+        "manual:review"
+      ]
+    },
+    {
+      "path": "/Users/marcmunoz/fabric/cold/ (latest: openclaw-task-2026-04-02T0130Z-6553.md)",
+      "expected_freshness_hours": 168,
+      "actual_age_hours": 4.1,
+      "status": "fresh",
+      "producer": "openclaw-task-system (archived)",
+      "consumers": [
+        "manual:reference"
+      ]
+    }
+  ],
+  "freshness_summary": {
+    "total_sources": 17,
+    "fresh": 9,
+    "stale": 8,
+    "stale_sources_requiring_attention": [
+      "paper-trading-execution-log.jsonl (257.4h old)",
+      "quant-research.log (53.5h old)",
+      "glint-monitor.log (249.1h old)",
+      "kalshi-resolver.log (260.9h old)",
+      "mirofish.log (249.6h old)",
+      "gov-tax-deed-scraper.log (263.0h old)",
+      "knowledge-graph.log (342.2h old)",
+      "observations.md (34.3h old)"
+    ]
+  }
+}
