@@ -1,0 +1,9 @@
+{
+  "name": "jctx",
+  "private": true,
+  "description": "Jailbreak Context Overlay: additive context cold-storage and search sidecar for Jailbreak.",
+  "type": "module",
+  "bin": {
+    "jctx": "./jctx.ts"
+  }
+}
