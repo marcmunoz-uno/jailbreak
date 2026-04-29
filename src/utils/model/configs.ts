@@ -103,12 +103,17 @@ export const GPT_5_4_CONFIG = {
   openai: 'gpt-5.4',
 } as const satisfies ModelConfig
 
+// Key name is historical ("gpt53codex"); the resolved canonical is now gpt-5.4
+// since the ChatGPT codex backend no longer accepts gpt-5.2-codex for this
+// account. Any ModelKey lookup via `getModelStrings().gpt53codex` transparently
+// returns gpt-5.4 so the `codex` alias, codex-subscriber default, and UI labels
+// all resolve to the currently-served model.
 export const GPT_5_3_CODEX_CONFIG = {
-  firstParty: 'gpt-5.3-codex',
-  bedrock: 'gpt-5.3-codex',
-  vertex: 'gpt-5.3-codex',
-  foundry: 'gpt-5.3-codex',
-  openai: 'gpt-5.3-codex',
+  firstParty: 'gpt-5.4',
+  bedrock: 'gpt-5.4',
+  vertex: 'gpt-5.4',
+  foundry: 'gpt-5.4',
+  openai: 'gpt-5.4',
 } as const satisfies ModelConfig
 
 export const GPT_5_4_MINI_CONFIG = {

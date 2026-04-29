@@ -1,13 +1,13 @@
 {
-  "name": "claude-code-source-snapshot",
+  "name": "jailbreak",
   "version": "2.1.87",
   "private": true,
-  "description": "Reconstructed Bun CLI workspace for the Claude Code source snapshot.",
+  "description": "Jailbreak local coding agent harness.",
   "type": "module",
   "packageManager": "bun@1.3.11",
   "bin": {
-    "claude": "./cli",
-    "claude-source": "./cli"
+    "jailbreak": "./cli",
+    "claude": "./cli"
   },
   "engines": {
     "bun": ">=1.3.11"

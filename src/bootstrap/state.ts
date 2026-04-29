@@ -1756,3 +1756,13 @@ export function setPromptId(id: string | null): void {
   STATE.promptId = id
 }
 
+export function isReplBridgeActive(): boolean {
+  // replBridgeActive is only in state for ant builds (USER_TYPE === 'ant').
+  // External builds always return false.
+  return (STATE as Record<string, unknown>)['replBridgeActive'] === true
+}
+
+export function setReplBridgeActive(value: boolean): void {
+  ;(STATE as Record<string, unknown>)['replBridgeActive'] = value
+}
+

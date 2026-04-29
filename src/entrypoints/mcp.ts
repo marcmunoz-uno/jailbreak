@@ -13,6 +13,7 @@ import type { Command } from '../commands.js'
 import {
   findToolByName,
   getEmptyToolPermissionContext,
+  getSafeToolPrompt,
   type ToolUseContext,
 } from '../Tool.js'
 import { getTools } from '../tools.js'
@@ -82,7 +83,7 @@ export async function startMCPServer(
             }
             return {
               ...tool,
-              description: await tool.prompt({
+              description: await getSafeToolPrompt(tool, {
                 getToolPermissionContext: async () => toolPermissionContext,
                 tools,
                 agents: [],

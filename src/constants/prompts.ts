@@ -60,6 +60,7 @@ import { logForDebugging } from '../utils/debug.js'
 import { loadMemoryPrompt } from '../memdir/memdir.js'
 import { isUndercover } from '../utils/undercover.js'
 import { isMcpInstructionsDeltaEnabled } from '../utils/mcpInstructionsDelta.js'
+import { loadSessionFabricPrompt } from '../services/SessionMemory/sessionFabric.js'
 
 // Dead code elimination: conditional imports for feature-gated modules
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -493,6 +494,11 @@ ${CYBER_RISK_INSTRUCTION}`,
       getSessionSpecificGuidanceSection(enabledTools, skillToolCommands),
     ),
     systemPromptSection('memory', () => loadMemoryPrompt()),
+    DANGEROUS_uncachedSystemPromptSection(
+      'session_fabric',
+      () => loadSessionFabricPrompt(),
+      'Shared session fabric must refresh as other sessions publish updates.',
+    ),
     systemPromptSection('ant_model_override', () =>
       getAntModelOverrideSection(),
     ),

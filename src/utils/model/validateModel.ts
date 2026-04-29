@@ -41,6 +41,18 @@ export async function validateModel(
     return { valid: true }
   }
 
+  // Generic OpenAI-compatible backends can expose arbitrary model IDs
+  // (for example OpenRouter, LiteLLM, vLLM, LM Studio). When that provider
+  // is active, trust the configured backend to validate the model name.
+  if (
+    getAPIProvider() === 'openai' &&
+    !!process.env.OPENAI_BASE_URL &&
+    !normalizedModel.startsWith('claude-')
+  ) {
+    validModelCache.set(normalizedModel, true)
+    return { valid: true }
+  }
+
   // Check if it's a known Codex/OpenAI model (skip Anthropic API validation)
   const { isCodexSubscriber } = await import('../auth.js')
   const { isCodexModel } = await import('../../services/api/codex-fetch-adapter.js')

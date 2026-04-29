@@ -89,9 +89,9 @@ Use Anthropic's first-party API directly.
 | Claude Sonnet 4.6 | `claude-sonnet-4-6` |
 | Claude Haiku 4.5 | `claude-haiku-4-5` |
 
-### OpenAI Codex
+### OpenAI / Compatible APIs
 
-Use OpenAI's Codex models for code generation. Requires a Codex subscription.
+Use OpenAI Codex via OAuth, or any OpenAI-compatible endpoint via API key and base URL.
 
 | Model | ID |
 |---|---|
@@ -102,6 +102,16 @@ Use OpenAI's Codex models for code generation. Requires a Codex subscription.
 ```bash
 export CLAUDE_CODE_USE_OPENAI=1
 free-code
+```
+
+For OpenAI-compatible backends such as LiteLLM, Ollama proxies, LM Studio, vLLM, or OpenRouter-compatible gateways:
+
+```bash
+export CLAUDE_CODE_USE_OPENAI=1
+export OPENAI_BASE_URL="http://localhost:4000/v1"
+export OPENAI_API_KEY="dummy-or-real-key"
+export OPENAI_MODEL="qwen2.5-coder"
+jailbreak
 ```
 
 ### AWS Bedrock
@@ -152,7 +162,7 @@ Supports custom deployment IDs as model names.
 | Provider | Env Variable | Auth Method |
 |---|---|---|
 | Anthropic (default) | -- | `ANTHROPIC_API_KEY` or OAuth |
-| OpenAI Codex | `CLAUDE_CODE_USE_OPENAI=1` | OAuth via OpenAI |
+| OpenAI / Compatible | `CLAUDE_CODE_USE_OPENAI=1` | OAuth via OpenAI, or `OPENAI_API_KEY` + `OPENAI_BASE_URL` |
 | AWS Bedrock | `CLAUDE_CODE_USE_BEDROCK=1` | AWS credentials |
 | Google Vertex AI | `CLAUDE_CODE_USE_VERTEX=1` | `gcloud` ADC |
 | Anthropic Foundry | `CLAUDE_CODE_USE_FOUNDRY=1` | `ANTHROPIC_FOUNDRY_API_KEY` |

@@ -69,7 +69,11 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
     specifiedModel = modelOverride
   } else {
     const settings = getSettings_DEPRECATED() || {}
-    specifiedModel = process.env.ANTHROPIC_MODEL || settings.model || undefined
+    specifiedModel =
+      (getAPIProvider() === 'openai' ? process.env.OPENAI_MODEL : undefined) ||
+      process.env.ANTHROPIC_MODEL ||
+      settings.model ||
+      undefined
   }
 
   // Ignore the user-specified model if it's not in the availableModels allowlist.
@@ -183,6 +187,10 @@ export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
     return getModelStrings().gpt53codex
   }
 
+  if (getAPIProvider() === 'openai' && process.env.OPENAI_MODEL) {
+    return process.env.OPENAI_MODEL
+  }
+
   // Ants default to defaultModel from flag config, or Opus 1M if not configured
   if (process.env.USER_TYPE === 'ant') {
     return (
@@ -275,8 +283,8 @@ export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
   if (name.includes('gpt-5.4')) {
     return 'gpt-5.4'
   }
-  if (name.includes('gpt-5.3-codex')) {
-    return 'gpt-5.3-codex'
+  if (name.includes('gpt-5.2-codex')) {
+    return 'gpt-5.2-codex'
   }
   const match = name.match(/(claude-(\d+-\d+-)?\w+)/)
   if (match && match[1]) {
@@ -304,7 +312,7 @@ export function getClaudeAiUserDefaultModelDescription(
   fastMode = false,
 ): string {
   if (isCodexSubscriber()) {
-    return 'GPT-5.3 Codex · Optimized for code generation and understanding'
+    return 'GPT-5.4 · Latest Codex-subscription model'
   }
   if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
     if (isOpus1mMergeEnabled()) {
@@ -411,7 +419,7 @@ export function getPublicModelDisplayName(model: ModelName): string | null {
     case getModelStrings().gpt54:
       return 'GPT-5.4'
     case getModelStrings().gpt53codex:
-      return 'GPT-5.3 Codex'
+      return 'GPT-5.2 Codex'
     case getModelStrings().gpt54mini:
       return 'GPT-5.4 Mini'
     default:
@@ -502,6 +510,8 @@ export function parseUserSpecifiedModel(
         return getDefaultHaikuModel() + (has1mTag ? '[1m]' : '')
       case 'opus':
         return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
+      case 'codex':
+        return getModelStrings().gpt53codex + (has1mTag ? '[1m]' : '')
       case 'best':
         return getBestModel()
       default:
@@ -655,8 +665,8 @@ export function getMarketingNameForModel(modelId: string): string | undefined {
   if (canonical.includes('gpt-5.4')) {
     return 'GPT-5.4'
   }
-  if (canonical.includes('gpt-5.3-codex')) {
-    return 'GPT-5.3 Codex'
+  if (canonical.includes('gpt-5.2-codex')) {
+    return 'GPT-5.2 Codex'
   }
 
   return undefined

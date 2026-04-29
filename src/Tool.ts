@@ -359,6 +359,21 @@ export function findToolByName(tools: Tools, name: string): Tool | undefined {
   return tools.find(t => toolMatchesName(t, name))
 }
 
+export async function getSafeToolPrompt(
+  tool: Tool,
+  options: {
+    getToolPermissionContext: () => Promise<ToolPermissionContext>
+    tools: Tools
+    agents: AgentDefinition[]
+    allowedAgentTypes?: string[]
+  },
+): Promise<string> {
+  if (typeof tool.prompt === 'function') {
+    return tool.prompt(options)
+  }
+  return tool.userFacingName(undefined) || tool.name
+}
+
 export type Tool<
   Input extends AnyObject = AnyObject,
   Output = unknown,

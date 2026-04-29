@@ -29,7 +29,12 @@ import type { AgentId } from 'src/types/ids.js'
 import type { z } from 'zod/v4'
 import { CLI_SYSPROMPT_PREFIXES } from '../constants/system.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
-import type { Tool, ToolPermissionContext, Tools } from '../Tool.js'
+import {
+  getSafeToolPrompt,
+  type Tool,
+  type ToolPermissionContext,
+  type Tools,
+} from '../Tool.js'
 import { AGENT_TOOL_NAME } from '../tools/AgentTool/constants.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '../tools/ExitPlanModeTool/constants.js'
@@ -168,7 +173,7 @@ export async function toolToAPISchema(
 
     base = {
       name: tool.name,
-      description: await tool.prompt({
+      description: await getSafeToolPrompt(tool, {
         getToolPermissionContext: options.getToolPermissionContext,
         tools: options.tools,
         agents: options.agents,

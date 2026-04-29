@@ -221,10 +221,10 @@ function getGpt54Option(): ModelOption {
 
 function getGpt53CodexOption(): ModelOption {
   return {
-    value: 'gpt-5.3-codex',
-    label: 'GPT-5.3 Codex',
-    description: 'GPT-5.3 Codex · Optimized for code generation and understanding',
-    descriptionForModel: 'GPT-5.3 Codex - specialized for code generation and understanding',
+    value: 'gpt-5.2-codex',
+    label: 'GPT-5.2 Codex',
+    description: 'GPT-5.2 Codex · Optimized for code generation and understanding',
+    descriptionForModel: 'GPT-5.2 Codex - specialized for code generation and understanding',
   }
 }
 

@@ -14,6 +14,7 @@ import {
 } from '../services/analytics/index.js'
 import type { Tool } from '../Tool.js'
 import {
+  getSafeToolPrompt,
   type ToolPermissionContext,
   type Tools,
   toolMatchesName,
@@ -347,7 +348,7 @@ async function calculateDeferredToolDescriptionChars(
 
   const sizes = await Promise.all(
     deferredTools.map(async tool => {
-      const description = await tool.prompt({
+      const description = await getSafeToolPrompt(tool, {
         getToolPermissionContext,
         tools,
         agents,

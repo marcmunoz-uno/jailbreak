@@ -46,6 +46,10 @@ import {
   loadSessionMemoryTemplate,
 } from './prompts.js'
 import {
+  isSessionFabricEnabled,
+  updateSessionFabric,
+} from './sessionFabric.js'
+import {
   DEFAULT_SESSION_MEMORY_CONFIG,
   getSessionMemoryConfig,
   getToolCallsBetweenUpdates,
@@ -78,7 +82,10 @@ import {
  * Uses cached gate value - returns immediately without blocking.
  */
 function isSessionMemoryGateEnabled(): boolean {
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_session_memory', false)
+  return (
+    isSessionFabricEnabled() ||
+    getFeatureValue_CACHED_MAY_BE_STALE('tengu_session_memory', false)
+  )
 }
 
 /**
@@ -324,6 +331,11 @@ const extractSessionMemory = sequential(async function (
     overrides: { readFileState: setupContext.readFileState },
   })
 
+  const updatedMemory = await getFsImplementation().readFile(memoryPath, {
+    encoding: 'utf-8',
+  })
+  await updateSessionFabric(updatedMemory)
+
   // Log extraction event for tracking frequency
   // Use the token usage from the last message in the conversation
   const lastMessage = messages[messages.length - 1]
@@ -431,6 +443,11 @@ export async function manuallyExtractSessionMemory(
       forkLabel: 'session_memory_manual',
       overrides: { readFileState: setupContext.readFileState },
     })
+
+    const updatedMemory = await getFsImplementation().readFile(memoryPath, {
+      encoding: 'utf-8',
+    })
+    await updateSessionFabric(updatedMemory)
 
     // Log manual extraction event
     logEvent('tengu_session_memory_manual_extraction', {})

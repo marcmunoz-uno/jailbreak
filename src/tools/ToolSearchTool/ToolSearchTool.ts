@@ -8,6 +8,7 @@ import {
 import {
   buildTool,
   findToolByName,
+  getSafeToolPrompt,
   type Tool,
   type ToolDef,
   type Tools,
@@ -69,7 +70,7 @@ const getToolDescriptionMemoized = memoize(
     if (!tool) {
       return ''
     }
-    return tool.prompt({
+    return getSafeToolPrompt(tool, {
       getToolPermissionContext: async () => ({
         mode: 'default' as const,
         additionalWorkingDirectories: new Map(),

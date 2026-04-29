@@ -35,7 +35,11 @@ import {
   getVertexRegionForModel,
   isEnvTruthy,
 } from '../../utils/envUtils.js'
-import { createCodexFetch } from './codex-fetch-adapter.js'
+import {
+  createCodexFetch,
+  createOpenAICompatibleFetch,
+  isCodexModel,
+} from './codex-fetch-adapter.js'
 
 /**
  * Environment variables for different client types:
@@ -306,6 +310,46 @@ export async function getAnthropicClient({
   }
 
   // ── Codex (OpenAI) provider via fetch adapter ─────────────────────
+  if (getAPIProvider() === 'openai') {
+    const openAIBaseUrl = process.env.OPENAI_BASE_URL
+    const openAIApiKey = process.env.OPENAI_API_KEY
+    const openAIModel = process.env.OPENAI_MODEL
+    const requestedModel = model || openAIModel
+    const codexTokens = getCodexOAuthTokens()
+
+    // For explicit OpenAI-compatible API usage, prefer the configured
+    // base URL + API key over any stale Codex OAuth tokens on disk.
+    if (openAIBaseUrl && openAIApiKey) {
+      const compatibleFetch = createOpenAICompatibleFetch(openAIApiKey, {
+        baseUrl: openAIBaseUrl,
+        modelOverride: openAIModel,
+      })
+      const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
+        apiKey: 'openai-compatible-placeholder',
+        ...ARGS,
+        fetch: compatibleFetch as unknown as typeof globalThis.fetch,
+        ...(isDebugToStdErr() && { logger: createStderrLogger() }),
+      }
+      return new Anthropic(clientConfig)
+    }
+
+    if (
+      requestedModel &&
+      isCodexModel(requestedModel) &&
+      codexTokens?.accessToken
+    ) {
+      const codexFetch = createCodexFetch(codexTokens.accessToken)
+      const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
+        apiKey: 'codex-placeholder',
+        ...ARGS,
+        fetch: codexFetch as unknown as typeof globalThis.fetch,
+        ...(isDebugToStdErr() && { logger: createStderrLogger() }),
+      }
+      return new Anthropic(clientConfig)
+    }
+
+  }
+
   if (isCodexSubscriber()) {
     const codexTokens = getCodexOAuthTokens()
     if (codexTokens?.accessToken) {
