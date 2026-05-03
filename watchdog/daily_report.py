@@ -4,7 +4,7 @@ OpenClaw Daily Health Report
 =============================
 Generates a comprehensive daily summary and sends it via Telegram.
 
-Schedule: 0 8 * * * /usr/bin/python3 /Users/marcmunoz/.openclaw/watchdog/daily_report.py
+Schedule: 0 8 * * * /usr/bin/python3 $HOME/.openclaw/watchdog/daily_report.py
 """
 
 import json
@@ -25,7 +25,7 @@ from watchdog import (
 )
 from telegram import send_daily_report
 
-BASE = Path("/Users/marcmunoz/.openclaw")
+BASE = Path(os.environ.get("OPENCLAW_BASE", str(Path.home() / ".openclaw"))).expanduser()
 CRON_RUNS_DIR = BASE / "cron" / "runs"
 
 
@@ -209,7 +209,7 @@ def generate_report() -> str:
 
 
 def main():
-    dry_run = "--dry" in sys.argv
+    dry_run = "--dry" in sys.argv or "--dry-run" in sys.argv
     report = generate_report()
 
     print(report)

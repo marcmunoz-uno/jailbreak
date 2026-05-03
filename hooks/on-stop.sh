@@ -41,7 +41,7 @@ echo "$RESPONSE" | grep -qiE 'decided|will do|plan is|committed to|conclusion' &
 echo "$RESPONSE" | grep -qiE 'fixed|resolved|bug|error.*fixed|patched' && TYPE="resolution"
 echo "$RESPONSE" | grep -qiE 'handoff|needs.*attention|action.needed|blocked.*by' && TYPE="handoff"
 
-source "$SCRIPT_DIR/../fabric-adapter.sh"
+source "$SCRIPT_DIR/fabric-adapter.sh"
 
 PROJECT=$(basename "$CWD" 2>/dev/null || echo "unknown")
 

@@ -10,7 +10,7 @@ Usage:
     python3 watchdog.py          # run all checks
     python3 watchdog.py --dry    # print results, skip Telegram
 
-Schedule: */5 * * * * /usr/bin/python3 /Users/marcmunoz/.openclaw/watchdog/watchdog.py
+Schedule: */5 * * * * /usr/bin/python3 $HOME/.openclaw/watchdog/watchdog.py
 """
 
 import json
@@ -27,7 +27,7 @@ from pathlib import Path
 # Configuration
 # ---------------------------------------------------------------------------
 
-BASE = Path("/Users/marcmunoz/.openclaw")
+BASE = Path(os.environ.get("OPENCLAW_BASE", str(Path.home() / ".openclaw"))).expanduser()
 STATE_FILE = BASE / "watchdog" / "state.json"
 ALERT_COOLDOWN_MINUTES = 30
 
@@ -407,7 +407,7 @@ def run_all_checks() -> list:
 
 
 def main():
-    dry_run = "--dry" in sys.argv
+    dry_run = "--dry" in sys.argv or "--dry-run" in sys.argv
 
     start = time.time()
     results = run_all_checks()

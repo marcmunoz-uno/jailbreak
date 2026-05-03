@@ -93,3 +93,25 @@ This repo is the configuration layer. The runtime depends on:
 - Fabric memory system at `~/fabric/`
 - Hook harness at `~/icarus-daedalus/`
 - MCP servers at `~/n8n-workflows/` and `~/agent-memory-server/`
+
+## Linux ARM notes
+
+This repository was authored around a macOS home directory layout. The `linux-arm64-compat` branch makes the lowest-risk portability fixes for Ubuntu `aarch64` hosts:
+
+- replaces hardcoded `/Users/...` hook paths with `$HOME`-based paths
+- makes watchdog scripts honor `OPENCLAW_BASE`
+- adds a Linux `crontab` install path for the watchdog
+- includes `env/linux-arm64.sh` to repair Snap-packaged Git helpers on systems where `git remote-https` is missing
+
+On Codex Snap environments, source the compatibility env first:
+
+```bash
+source env/linux-arm64.sh
+```
+
+That exports:
+
+- `GIT_EXEC_PATH=/snap/codex/35/usr/lib/git-core`
+- `GIT_TEMPLATE_DIR=/snap/codex/35/usr/share/git-core/templates`
+
+Without those, Git may fail with `git: 'remote-https' is not a git command`.

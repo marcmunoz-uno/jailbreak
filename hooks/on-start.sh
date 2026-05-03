@@ -8,7 +8,7 @@ set -euo pipefail
 FABRIC_DIR="${FABRIC_DIR:-$HOME/fabric}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKFLOWS_DIR="/Users/marcmunoz/n8n-workflows"
+WORKFLOWS_DIR="${WORKFLOWS_DIR:-$HOME/n8n-workflows}"
 
 INPUT=$(cat)
 CWD=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")

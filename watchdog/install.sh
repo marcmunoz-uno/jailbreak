@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
-# Installs the watchdog as a launchd service running every 5 minutes
-# and the daily report as a separate service running at 8 AM
+# Installs the watchdog scheduler.
+# macOS uses launchd; Linux falls back to user crontab entries.
 
 set -euo pipefail
 
-WATCHDOG_DIR="/Users/marcmunoz/.openclaw/watchdog"
-PLIST_DIR="$HOME/Library/LaunchAgents"
+WATCHDOG_DIR="${OPENCLAW_BASE:-$HOME/.openclaw}/watchdog"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OS="$(uname -s)"
 
 # Create log directory
 mkdir -p "$WATCHDOG_DIR/logs"
 
+if [ "$OS" = "Darwin" ]; then
+PLIST_DIR="$HOME/Library/LaunchAgents"
+
 # Create the 5-minute watchdog plist
-cat > "$PLIST_DIR/com.openclaw.watchdog.plist" << 'PLIST'
+cat > "$PLIST_DIR/com.openclaw.watchdog.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -21,14 +25,14 @@ cat > "$PLIST_DIR/com.openclaw.watchdog.plist" << 'PLIST'
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/python3</string>
-        <string>/Users/marcmunoz/.openclaw/watchdog/watchdog.py</string>
+        <string>${SCRIPT_DIR}/watchdog.py</string>
     </array>
     <key>StartInterval</key>
     <integer>300</integer>
     <key>StandardOutPath</key>
-    <string>/Users/marcmunoz/.openclaw/watchdog/logs/watchdog.log</string>
+    <string>${WATCHDOG_DIR}/logs/watchdog.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/marcmunoz/.openclaw/watchdog/logs/watchdog.err.log</string>
+    <string>${WATCHDOG_DIR}/logs/watchdog.err.log</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
@@ -38,7 +42,7 @@ cat > "$PLIST_DIR/com.openclaw.watchdog.plist" << 'PLIST'
 PLIST
 
 # Create the daily report plist (runs at 8 AM)
-cat > "$PLIST_DIR/com.openclaw.watchdog-daily.plist" << 'PLIST'
+cat > "$PLIST_DIR/com.openclaw.watchdog-daily.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -48,7 +52,7 @@ cat > "$PLIST_DIR/com.openclaw.watchdog-daily.plist" << 'PLIST'
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/python3</string>
-        <string>/Users/marcmunoz/.openclaw/watchdog/daily_report.py</string>
+        <string>${SCRIPT_DIR}/daily_report.py</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
@@ -58,9 +62,9 @@ cat > "$PLIST_DIR/com.openclaw.watchdog-daily.plist" << 'PLIST'
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/marcmunoz/.openclaw/watchdog/logs/daily.log</string>
+    <string>${WATCHDOG_DIR}/logs/daily.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/marcmunoz/.openclaw/watchdog/logs/daily.err.log</string>
+    <string>${WATCHDOG_DIR}/logs/daily.err.log</string>
 </dict>
 </plist>
 PLIST
@@ -77,3 +81,21 @@ echo "✓ Daily report scheduled (8 AM daily)"
 echo "  Logs: $WATCHDOG_DIR/logs/"
 echo "  To check status: launchctl list | grep watchdog"
 echo "  To stop: launchctl unload $PLIST_DIR/com.openclaw.watchdog.plist"
+else
+    WATCHDOG_CMD="*/5 * * * * OPENCLAW_BASE=${OPENCLAW_BASE:-$HOME/.openclaw} /usr/bin/python3 ${SCRIPT_DIR}/watchdog.py >> ${WATCHDOG_DIR}/logs/watchdog.log 2>> ${WATCHDOG_DIR}/logs/watchdog.err.log"
+    DAILY_CMD="0 8 * * * OPENCLAW_BASE=${OPENCLAW_BASE:-$HOME/.openclaw} /usr/bin/python3 ${SCRIPT_DIR}/daily_report.py >> ${WATCHDOG_DIR}/logs/daily.log 2>> ${WATCHDOG_DIR}/logs/daily.err.log"
+    TMP_CRON="$(mktemp)"
+
+    crontab -l 2>/dev/null | grep -v 'watchdog.py' | grep -v 'daily_report.py' > "$TMP_CRON" || true
+    {
+        echo "$WATCHDOG_CMD"
+        echo "$DAILY_CMD"
+    } >> "$TMP_CRON"
+    crontab "$TMP_CRON"
+    rm -f "$TMP_CRON"
+
+    echo "✓ Watchdog installed via user crontab"
+    echo "✓ Daily report scheduled via user crontab"
+    echo "  Logs: $WATCHDOG_DIR/logs/"
+    echo "  To check status: crontab -l | grep openclaw"
+fi
